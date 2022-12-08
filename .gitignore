@@ -1,0 +1,6 @@
+*.aux
+.ipynb_checkpoints
+*.log
+*.out
+*.pdf
+test.tex
