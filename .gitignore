@@ -4,3 +4,4 @@
 *.out
 *.pdf
 test.tex
+__pycache__
