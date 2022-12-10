@@ -33,19 +33,19 @@ def isocut5(samples: np.array):
     N_sub = num_intervals + 1
 
     # indices of the subsampled samples
-    inds = np.zeros((N_sub,), dtype=np.int32)
+    inds = np.zeros((N_sub,), dtype=np.float32)
     inds[0] = 0
     for i in range(num_intervals):
-        inds[i + 1] = int(np.floor(inds[i] + intervals[i]))
+        inds[i + 1] = inds[i] + intervals[i]
     
     # These are the subsampled samples
     X_sub = np.zeros((N_sub,), dtype=samples.dtype)
     for i in range(N_sub):
-        X_sub[i] = samples_sorted[inds[i]]
+        X_sub[i] = samples_sorted[int(inds[i])]
     ##################################################
 
     spacings = X_sub[1:] - X_sub[:(N_sub - 1)]
-    multiplicities = inds[1:] - inds[:(N_sub - 1)]
+    multiplicities = np.floor(inds[1:]) - np.floor(inds[:(N_sub - 1)])
     densities = multiplicities / spacings
 
     densities_unimodal_fit = jisotonic5_updown(densities, multiplicities)
@@ -58,8 +58,6 @@ def isocut5(samples: np.array):
 
     # dipscore_out
     dipscore_out, critical_range_min, critical_range_max = compute_ks5(multiplicities, densities_unimodal_fit_times_spacings, peak_index)
-
-    critical_range_length = critical_range_max - critical_range_min + 1
 
     densities_resid_on_critical_range = densities_resid[critical_range_min:(critical_range_max + 1)]
     weights_for_downup = spacings[critical_range_min:(critical_range_max + 1)]
