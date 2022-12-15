@@ -6,6 +6,8 @@ Note that isosplit_arxiv.tex is in this directory
 
 A limitation of many clustering algorithms is that they require adjustable parameters to be tuned for each application or dataset, making them unsuitable for use in automated procedures that involve clustering as a processing step. Some techniques require an initial estimate of the number of clusters, while density-based techniques typically require a scale parameter. Other parametric methods, such as mixture modeling, make assumptions about the underlying cluster distributions. Here we introduce ISO-SPLIT, a non-parametric clustering method that does not require adjustable parameters nor parametric assumptions about the underlying cluster distributions. The only assumption is that clusters are unimodal and separated from one another by separating hyperplanes of relatively lower density. The technique uses a variant of Hartigan's dip statistic and isotonic regression as its kernel operation. Using simulations, we compare ISO-SPLIT with standard methods including k-means, density-based techniques, and Gaussian mixture methods. Our algorithm was developed to tackle the "spike sorting" problem in electrophysiology and is well-suited for low-dimensional datasets with many observations. ISO-SPLIT has been a key component of the MountainSort spike sorting algorithm and its source code is freely available.
 
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d141963345d4017ce9dfc354f9f1&label=Bluster:%20Unequal%20variances
+
 ## Introduction
 
 <!-- rewritten -->
@@ -88,146 +90,19 @@ The function *InitializeLabels* creates an initial labeling (or partitioning) of
 
 The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering procedure described in the previous section, using a threshold of $\tau_n=\alpha/\sqrt{n}$.
 
-## Figuring out what the implemented algorithm actually does
+## Results
 
-```c++
-dipscore_out, cutpoint_out = isocut5(samples)
+### Unequal variances
 
-// N = number of samples
-samples_sorted = sort(samples)
+K-means clustering assumes equal variances for the clusters, which leads to incorrect decision boundaries when clusters have unequal variances. The error is most pronounced when the variance mismatch is large and when the clusters are overlapping.  Isosplit is less likely to suffer from this problem due to its use of a decision boundary at the point of lowest density between the clusters.
 
-//////////////////////////////////////////////////////////
-// SUBSAMPLING
-// num_bins is sqrt(N/2) * factor
-num_bins_factor = 1
-num_bins = ceil(sqrt(N * 1.0 / 2) * num_bins_factor)
+To illustrate this, we used a simulation of two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). Figure XX(a) shows the accuracy of the various methods for varying distances between the clusters, and XX(b) illustrates the clusterings for a separation distance of SSSS.
 
-num_bins_1 = ceil(num_bins / 2) // left bins
-num_bins_2 = num_bins - num_bins_1 // right bins
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d141963345d4017ce9dfc354f9f1&label=Bluster:%20Unequal%20variances
 
-// I guess this is the same as num_bins
-num_intervals = num_bins_1 + num_bins_2
+Figure XX: (a) Accuracy of various clustering algorithms applied to a simulation of two Gaussian clusters as a function of the separation distance between the two clusters. The standard deviations for the two clusters are $\sigma_1=10$ and $\sigma_2=1$. (b) The clustering output for a separation distance of SSSS.
 
-// what is this? the number of samples in each interval?
-intervals[num_intervals]
-intervals[i] = i + 1 for i < num_bins_1
-intervals[num_intervals - 1 - i] = i + 1 for i < num_bins_2
-
-alpha = (N - 1) / sum(intervals)
-
-// now we scale this such that sum(intervals) = N - 1
-intervals = intervals * alpha
-
-// number of subsamples
-N_sub = num_intervals + 1
-
-// indices of the subsampled samples
-inds[N_sub]
-inds[0] = 0
-inds[i + 1] = inds[i] + intervals[i]
-
-// These are the subsampled samples
-X_sub[N_sub]
-X_sub[i] = samples_sorted[floor(inds[i])]
-//////////////////////////////////////////////////////////
-
-spacings[N_sub - 1]
-spacings[i] = X_sub[i + 1] - X_sub[i]
-
-multiplicities[N_sub - 1]
-multiplicities[i] = inds[i + 1] - inds[i]
-
-densities[N_sub - 1]
-densities[i] = multiplicities[i] / spacings[i]
-
-densities_unimodal_fit = jisotonic5_updown(densities, multiplicities)
-
-densities_resid[N_sub - 1]
-densities_resid[i] = densities[i] - densities_unimodal_fit[i]
-
-densities_unimodal_fit_times_spacings = densities_unimodal_fit * spacings
-
-peak_index = argmax(densities_unimodal_fit)
-
-// dipscore_out
-dipscore_out, critical_range_min, critical_range_max = compute_ks5(multiplicities, densities_unimodal_fit_times_spacings, peak_index)
-
-critical_range_length = critical_range_max - critical_range_min + 1;
-
-densities_resid_on_critical_range[critical_range_length]
-densities_resid_on_critical_range[i] = densities_resid[critical_range_min + i];
-
-weights_for_downup[critical_range_length]
-weights_for_downup[i] = spacings[critical_range_min + i]
-
-densities_resid_fit_on_critical_range
-densities_resid_fit_on_critical_range = jisotonic5_downup(densities_resid_on_critical_range, weights_for_downup)
-
-cutpoint_index = argmin(densities_resid_fit_on_critical_range);
-
-// cutpoint_out
-cutpoint_out = (X_sub[critical_range_min + cutpoint_index] + X_sub[critical_range_min + cutpoint_index + 1]) / 2
-```
-
-```c++
-ks_best, critical_range_min, critical_range_max = compute_ks5(counts1, counts2, peak_index)
-
-critical_range_min = 0
-critical_range_max = N - 1
-
-double ks_best = -1
-
-// from the left
-counts1_left[peak_index + 1]
-counts1_left[i] = counts1[i]
-
-counts2_left[peak_index + 1]
-counts2_left[i] = counts2[i]
-
-len = peak_index + 1
-while (len >= 4) or (len == peak_index + 1)
-	ks0 = compute_ks4(counts1_left[0..len-1], counts2_left[0..len-1])
-	if ks0 > ks_best
-		critical_range_min = 0
-		critical_range_max = len - 1
-		ks_best = ks0
-	len = len / 2
-
-// from the right
-counts1_right[N - peak_index]
-counts1_right[i] = counts1[N - 1 - i]
-
-counts2_right[N - peak_index]
-counts2_right[i] = counts2[N - 1 - i]
-
-len = N - peak_index
-while (len >= 4) or (len == N - peak_index)
-	ks0 = compute_ks4(counts1_right[0..len-1], counts2_right[0..len-1])
-	if ks0 > ks_best
-		critical_range_min = N - len
-		critical_range_max = N - 1
-		ks_best = ks0
-	len = len / 2
-```
-
-```c++
-ks = compute_ks4(counts1, counts2)
-
-sum_counts1 = sum(counts1);
-sum_counts2 = sum(counts2);
-
-cumsum_counts1 = 0;
-cumsum_counts2 = 0;
-
-max_diff = 0
-for i = 0..N-1
-	cumsum_counts1 += counts1[i]
-	cumsum_counts2 += counts2[i]
-	diff = abs(cumsum_counts1/sum_counts1 - cumsum_counts2 / sum_counts2)
-	if diff > max_diff
-		max_diff = diff
-ks = max_diff * sqrt((sum_counts1 + sum_counts2) / 2)
-```
+## References
 
 Hartigan, J. A., & Hartigan, P. M. (1985). The Dip Test of Unimodality. The Annals of Statistics.
 
