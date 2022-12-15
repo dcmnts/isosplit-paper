@@ -1,5 +1,5 @@
 import numpy as np
-from isocut5 import isocut5
+from isocut5_slow import isocut5
 
 def main():
     a = 0 + np.random.randn(1000)

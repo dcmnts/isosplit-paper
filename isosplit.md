@@ -39,6 +39,12 @@ In addition to being density-based, our technique has elements of both agglomera
 <!-- TODO: rewrite -->
 This paper is organized as follows. First we describe an algorithm for splitting a 1D sample into unimodal clusters. This procedure forms the basis of the $p$-dimensional clustering technique, Isosplit, defined in Section 3. Simulation results are presented in Section 4, comparing Isosplit with three standard clustering techniques. In addition to quantitative comparisons using a measure of accuracy, examples illustrate situations where each algorithm performs best. The fifth section is an application of the algorithm to spike sorting of neuronal data. Next we discuss computational efficiency and scaling properties. Finally, Section 8 summarizes the results and discusses the limitations of the method. The appendices cover implementation details for isotonic regression, generation of synthetic datasets for simulations, and provide evidence for insensitivity to parameter adjustments.
 
+**TODO: MeanShift**: Talk about the mean shift algorithm. It also is non-parametric, and it automatically estimates the bandwidth based on the data. However, it is a lot slower than Isosplit. And as we will see, it suffers from some of the limitations of other algorithms.
+
+**TODO: SpectralClustering**: Requires n_clusters. Seems that SC can be slow, esp on non-Gaussian example.
+
+**TODO: AgglomerativeClustering**: Requires n_clusters
+
 ## Clustering in one dimension
 
 <!-- rewritten -->
@@ -96,7 +102,7 @@ K-means clustering assumes equal variances for the clusters, which leads to inco
 
 To illustrate this, we simulated two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). The results are shown in interactive Figure UV.
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d141963345d4017ce9dfc354f9f1&label=Bluster:%20Unequal%20variances&hide=1&s={%22ds%22:15,%22algs%22:[%22DBSCAN%22,%22GMM%22,%22Isosplit%22,%22K-means%22]}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://701b2e9e22da982091f4974ce81e90f050cbd6bb&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22,%22MeanShift%22,%22SC%22,%22AC%22],%22ds%22:12}
 <!--
 height: 700
 -->
@@ -104,6 +110,8 @@ height: 700
 > Figure UV: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Use the interactive controls to explore all simulations.
 
 The results of the comparison show that GMM performs best, as expected since the clusters were drawn from Gaussian distributions and the number of components was known. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set. Generally, Isosplit performed better than the non-GMM methods when the clusters overlapped to a moderate extent. The decision boundary for k-means was incorrect due to the unequal variances between the two clusters, and DBSCAN had trouble due to the varying densities of the clusters, making it difficult to choose an ideal scale parameter.
+
+**TODO: Talk about MeanShift, SC, AC**
 
 ### Anisotropic clusters
 
@@ -113,10 +121,12 @@ K-means clustering assumes clusters are spherical, or isotropic. As it minimizes
 
 To illustrate this, we simulated three clusters in 2D, one spherical, and two having an anisotropic factor of 8:1. As in the unequal variances example, the separation distances were varied. The results are shown in interactive Figure AC. For separation distances around 4.5, Isosplit was more accurate than the other algorithms. Both k-means and GMM favored splitting the anisotropic clusters along the direction of elongation. DBSCAN struggled due to the variation in density in this example.
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://33f1cbfa20994ee4f8ba8b334fed2fe8f4cfae92&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22],%22ds%22:12}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://909839b7d5f72e063cc3c1994c37e2800f8be532&label=Bluster:%20Anisotropic%20clusters&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22,%22MeanShift%22,%22SC%22,%22AC%22],%22ds%22:12}
 <!--
 height: 700
 -->
+
+**TODO: Talk about MeanShift, SC, AC**
 
 > Figure UV: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Use the interactive controls to explore all simulations.
 
@@ -124,12 +134,14 @@ height: 700
 
 Both k-means and GMM assume that clusters are Gaussian distributed. When a cluster comes from a skewed distribution, the representative points are pulled in the skewed direction which can result in incorrect decision boundaries. Isosplit does not make the Gaussian assumption, and works with both skewed and symmetric distributions, provided they are unimodal. Figurl NG demonstrates this for two simulated clusters, with the one on the right being skewed right.
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8c44f1e5789ade40df976cd706d106713fbc184c&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22],%22ds%22:0}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://80bfba4334d1ae67c0955e3ec5ce8dbbb26ae51d&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22,%22MeanShift%22,%22SC%22,%22AC%22],%22ds%22:0}
 <!--
 height: 700
 -->
 
 > Figure NG: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Use the interactive controls to explore all simulations.
+
+**TODO: Talk about MeanShift, SC, AC**
 
 ## Many clusters
 
