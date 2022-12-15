@@ -88,6 +88,8 @@ The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering proced
 
 ## Results
 
+To highlight the scenarios where Isosplit overcomes the limitations of other methods, we evaluated the accuracy of the various algorithms using simulated datasets. We selected optimal parameters for the non-Isosplit algorithms based on the known simulation parameters (e.g., the number of clusters for k-means). Isosplit, on the other hand, does not require any user-defined parameters.
+
 ### Unequal variances
 
 K-means clustering assumes equal variances for the clusters, which leads to incorrect decision boundaries when clusters have unequal variances. The error is most pronounced when the variance mismatch is large and when the clusters are overlapping.  Isosplit is less likely to suffer from this problem due to its use of a decision boundary at the point of lowest density between the clusters.
@@ -115,6 +117,20 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://33f1cbfa20994ee4f8ba
 height: 700
 -->
 Figure UV: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Use the interactive controls to explore all simulations.
+
+## Non-Gaussian clusters
+
+Both k-means and GMM assume that clusters are Gaussian distributed. When a cluster comes from a skewed distribution, the representative points are pulled in the skewed direction which can result in incorrect decision boundaries. Isosplit does not make the Gaussian assumption, and works with both skewed and symmetric distributions, provided they are unimodal. Figurl NG demonstrates this for two simulated clusters, with the one on the right being skewed right.
+
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8c44f1e5789ade40df976cd706d106713fbc184c&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22],%22ds%22:0}
+<!--
+height: 700
+-->
+Figure NG: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Use the interactive controls to explore all simulations.
+
+## Many clusters
+
+## More than two dimensions
 
 ## References
 
