@@ -96,7 +96,7 @@ To illustrate this, we simulated two clusters drawn from spherical multivariate 
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d141963345d4017ce9dfc354f9f1&label=Bluster:%20Unequal%20variances&hide=1&s={%22ds%22:15,%22algs%22:[%22DBSCAN%22,%22GMM%22,%22Isosplit%22,%22K-means%22]}
 <!--
-height: 400
+height: 700
 -->
 Figure UV: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Use the interactive controls to explore all simulations.
 
@@ -112,7 +112,7 @@ To illustrate this, we simulated three clusters in 2D, one spherical, and two ha
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://33f1cbfa20994ee4f8ba8b334fed2fe8f4cfae92&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22],%22ds%22:12}
 <!--
-height: 400
+height: 700
 -->
 Figure UV: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Use the interactive controls to explore all simulations.
 
