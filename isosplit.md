@@ -92,14 +92,29 @@ The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering proced
 
 K-means clustering assumes equal variances for the clusters, which leads to incorrect decision boundaries when clusters have unequal variances. The error is most pronounced when the variance mismatch is large and when the clusters are overlapping.  Isosplit is less likely to suffer from this problem due to its use of a decision boundary at the point of lowest density between the clusters.
 
-To illustrate this, we simulated two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). The results are shown in interactive figure UV.
+To illustrate this, we simulated two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). The results are shown in interactive Figure UV.
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d141963345d4017ce9dfc354f9f1&label=Bluster:%20Unequal%20variances&hide=1&s={%22ds%22:15,%22algs%22:[%22DBSCAN%22,%22GMM%22,%22Isosplit%22,%22K-means%22]}
 <!--
 height: 400
 -->
+Figure UV: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Use the interactive controls to explore all simulations.
 
-Figure UV: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set. As expected, the GMM method beforms best due to the fact that the clusters were drawn from Gaussian distributions and the number of components was known. When the separation distance is such that the clusters overlap to a moderate extent, Isosplit performs better than the non-GMM methods. As expected, the decision boundary for k-means is incorrect due to the unequal variances between the two clusters. DBSCAN has some trouble due to the fact that the clusters have varying densities.
+The results of the comparison show that GMM performs best, as expected since the clusters were drawn from Gaussian distributions and the number of components was known. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set.  Generally, Isosplit performed better than then non-GMM methods when the clusters overlapped to a moderate extent. The decision boundary for k-means was incorrect due to the unequal variances between the two clusters, and DBSCAN had trouble due to the varying densities of the clusters, making it difficult to choose an ideal scale parameter.
+
+### Anisotropic clusters
+
+Another assumption of k-means is that clusters are spherical, or isotropic. Since it tries to minimize the sum of squared distances to the cluster center, k-means can favor splitting anisotropic clusters in a direction of elongation rather than separating distinct clusters. Since it does not try to minimize any such metric, Isosplit does not have this problem as it will split along directions where there is a density dip, regardless of anisotropic.
+
+K-means clustering assumes clusters are spherical, or isotropic. As it minimizes the sum of squared distances to the cluster center, k-means my favor splitting an elongated cluster along the direction of elongation rather than separating distinct anisotropic clusters. Isosplit, on the other hand, does not have this problem as it is designed to split clusters along directions where there is a density dip, regardless of anisotropic shape.
+
+To illustrate this, we simulated three clusters in 2D, one spherical, and two having an anisotropic factor of 8:1. As in the unequal variances example, the separation distances were varied. The results are shown in interactive Figure AC. For separation distances around 4.5, Isosplit was more accurate than the other algorithms. Both k-means and GMM favored splitting the anisotropic clusters along the direction of elongation. DBSCAN struggled due to the variation in density in this example.
+
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://33f1cbfa20994ee4f8ba8b334fed2fe8f4cfae92&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22K-means%22,%22DBSCAN%22,%22GMM%22,%22Isosplit%22],%22ds%22:12}
+<!--
+height: 400
+-->
+Figure UV: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Use the interactive controls to explore all simulations.
 
 ## References
 
