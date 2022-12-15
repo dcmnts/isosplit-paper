@@ -6,7 +6,7 @@ Note that isosplit_arxiv.tex is in this directory
 
 A limitation of many clustering algorithms is that they require adjustable parameters to be tuned for each application or dataset, making them unsuitable for use in automated procedures that involve clustering as a processing step. Some techniques require an initial estimate of the number of clusters, while density-based techniques typically require a scale parameter. Other parametric methods, such as mixture modeling, make assumptions about the underlying cluster distributions. Here we introduce ISO-SPLIT, a non-parametric clustering method that does not require adjustable parameters nor parametric assumptions about the underlying cluster distributions. The only assumption is that clusters are unimodal and separated from one another by separating hyperplanes of relatively lower density. The technique uses a variant of Hartigan's dip statistic and isotonic regression as its kernel operation. Using simulations, we compare ISO-SPLIT with standard methods including k-means, density-based techniques, and Gaussian mixture methods. Our algorithm was developed to tackle the "spike sorting" problem in electrophysiology and is well-suited for low-dimensional datasets with many observations. ISO-SPLIT has been a key component of the MountainSort spike sorting algorithm and its source code is freely available.
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d141963345d4017ce9dfc354f9f1&label=Bluster:%20Unequal%20variances
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d141963345d4017ce9dfc354f9f1&label=Bluster:%20Unequal%20variances&hide=1&s={%22ds%22:15,%22algs%22:[%22DBSCAN%22,%22GMM%22,%22Isosplit%22,%22K-means%22]}
 
 ## Introduction
 
