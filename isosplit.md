@@ -6,37 +6,24 @@ Many clustering algorithms require the tuning of adjustable parameters for each 
 
 ## Introduction
 
-<!-- rewritten -->
 The purpose of unsupervised data clustering is to automatically partition a set of datapoints into clusters that reflect the underlying structure of the data. In this work, we focus on scenarios where the datapoints lie in a low-dimensional space, there are many observations, and each cluster is characterized by a dense core area surrounded by regions of lower density. This situation is common in our motivating application of spike sorting of neural firing events in electrophysiology, where this type of structure has been observed experimentally [@tiganj, @vargas].
 
-<!-- rewritten -->
-Most clustering algorithms have the limitation of requiring careful adjustment of parameters. For example, this is a problem for k-means [@kmeans] where the choice of the number of clusters ($K$) can be difficult. This is especially true for large datasets with many clusters, as in the spike sorting application. The output of k-means also depends heavily on the initialization of the algorithm, and it is often necessary to run it multiple times to find a globally optimal solution. K-means has other limitations as well, such as rigid assumptions about cluster populations and variances, and the tendency to artificially split larger clusters and merge smaller ones.
+Most clustering algorithms have the limitation of requiring careful adjustment of parameters. For example, the choice of the number of clusters ($K$) for k-means [@kmeans] can be difficult, particularly for large datasets with many clusters, such as in the spike sorting application. The output of k-means also depends heavily on the initialization of the algorithm, and it is often necessary to run it multiple times to find a globally optimal solution. K-means has other limitations as well, such as rigid assumptions about cluster populations and variances, and the tendency to artificially split larger clusters and merge smaller ones.
 
-<!-- rewritten -->
 Gaussian mixture modeling (GMM) is a flexible clustering algorithm that is usually solved using expectation-maximization (EM) [@em]. Many variations exist, some of which are outlined in Chapter 11 of [@murphy]. Unlike k-means, GMM allows each cluster to be modeled using a multivariate normal distribution. Some GMM implementations require knowledge of the number of clusters beforehand (see Chapter 8 of [@mixturemodels], while others consider this as a free variable [@roberts1998bayesian] . The main disadvantage of GMM is that it assumes clusters are well modeled by Gaussian distributions, which may not always be the case. Additionally, like k-means, GMM can be difficult to optimize when the number of clusters is large. Recently, mixture models with skew non-Gaussian components have been developed [@skewGMM, @skewGMM2], but these models are more complex with additional free parameters and may be even more difficult to optimize.
 
-<!-- rewritten -->
 Hierarchical clustering (see Chapter 15 of [@zaki-book]) does not demand that the number of clusters be specified beforehand. However, the output is a dendrogram rather than a partition, preventing it from being directly applicable to our motivating example. To obtain a partition from the dendrogram, a criteria for cutting the binary tree must be specified, similar to specifying $K$ in k-means. In addition, other parameters are typically required in agglomerative methods to determine which clusters are joined in each iteration. A further issue is that the time complexity of hierarchical clustering is at least $O(n^2)$, where $n$ is the number of observations (see Sec. 14.2.3 of [@zaki-book].
 
-<!-- rewritten -->
 Density-based clustering techniques such as DBSCAN [@dbscan] are useful due to their lack of assumptions about data distributions, allowing them to effectively identify clusters with non-convex shapes. However, these techniques also involve free parameters. DBSCAN requires two parameters to be adjusted depending on the application, including $\epsilon$, a scale parameter. The algorithm is particularly sensitive to the $\epsilon$ parameter in higher dimensions. Additionally, if clusters in the dataset have varying densities, no choice of the $\epsilon$ parameter will be able to work on the entire dataset.
 
-<!-- rewritten -->
 Other density-based techniques such as mean-shift [@mean-shift] involve the initial step of constructing a continuous non-parametric probability density function (Chapter 15 of [@zaki-book]. The basic version of the kernel density estimation method [@kernel-density-function-1, @kernel-density-function-2] requires specifying a spatial scale parameter (the bandwidth), which is subject to the same problem as DBSCAN. Variations of this method can automatically determine an optimal, spatially-dependent bandwidth [@silverman-density-estimation]. There is a variety of density-estimation methods to choose from [@rodriguez-clustering], however, they are often dependent on adjustable distance parameters. In general, these methods become computationally intractable in higher dimensions (even 4 dimensions is challenging).
 
-<!--TODO: Other clustering methods -->
-Affinity Propagation Clustering
-K-medoids clustering
-Spectral clustering
-density-peak clustering (Rodriguez Laio)
+**TODO: density-peak clustering (Rodriguez Laio)**
 
-<!-- rewritten -->
 In this article, we present a density-based, scale-independent clustering technique that is suitable for situations where clusters are expected to be unimodal and can be separated from one another by hyperplanes. A cluster is considered unimodal if it is derived from a distribution that has a single peak of maximum density when projected onto any line. Thus, our assumption is that when any two adjacent clusters are projected onto the normal of a dividing hyperplane, they will form a 1D bimodal distribution with a split-point of lower density at the point of hyperplane intersection. Loosely speaking, this is the case when clusters are well-spaced and have convex shapes.
 
-<!-- rewritten -->
 In addition to being density-based, our technique has elements of both agglomerative hierarchical clustering and involves the EM-style iterative approach of k-means. It uses a non-parametric procedure to separate 1D distributions based on a modified Hartigan's dip statistic [@hartigan1985dip, @other_hartigan1985dip] and isotonic regression, which don't require any adjustable parameters (with the exception of a statistical significance threshold). In particular, no scale parameter is needed for density estimation. Moreover, since the core step of each iteration is 1D clustering applied to projections of data subsets onto lines, it overcomes the curse of dimensionality (the tradeoff being that we cannot handle clusters of arbitrary shape).
 
-<!-- TODO: rewrite -->
 This paper is organized as follows. First we describe an algorithm for splitting a 1D sample into unimodal clusters. This procedure forms the basis of the $p$-dimensional clustering technique, Isosplit, defined in Section 3. Simulation results are presented in Section 4, comparing Isosplit with three standard clustering techniques. In addition to quantitative comparisons using a measure of accuracy, examples illustrate situations where each algorithm performs best. The fifth section is an application of the algorithm to spike sorting of neuronal data. Next we discuss computational efficiency and scaling properties. Finally, Section 8 summarizes the results and discusses the limitations of the method. The appendices cover implementation details for isotonic regression, generation of synthetic datasets for simulations, and provide evidence for insensitivity to parameter adjustments.
 
 **TODO: MeanShift**: Talk about the mean shift algorithm. It also is non-parametric, and it automatically estimates the bandwidth based on the data. However, it is a lot slower than Isosplit. And as we will see, it suffers from some of the limitations of other algorithms.
@@ -47,13 +34,10 @@ This paper is organized as follows. First we describe an algorithm for splitting
 
 ## Clustering in one dimension
 
-<!-- rewritten -->
 Any approach overcoming the above limitations must at least be able to do so in the simplest, 1D case. Here we present a non-parametric approach to 1D clustering utilizing a statistical test for unimodality and isotonic regression. This procedure will then be used as the basis for the more general situation ($p\geq2$) described in Section [{isosplit-algorithm}].
   
-<!-- rewritten -->
 Clustering 1D data is special due to the fact that the input data can be sorted. The task then becomes finding the $K-1$ cut points (real numbers between adjacent datapoints) that determine the $K$ clusters. We assume that the clusters are unimodal, meaning that the density is lower between adjacent clusters. For simplicity we will describe an algorithm for deciding whether there is one cluster, or more than one cluster. In the latter case, a single cut point is determined representing the boundary separating one pair of adjacent clusters. Once the data have been split, the same algorithm may then be applied recursively on the left and right portions leading to further subdivisions, converging when no more splitting occurs. Thus, in addition to being the basis for higher dimensional clustering, the algorithm described here may also be used as a basis for general 1D clustering.
 
-<!-- rewritten -->
 We assume that two adjacent unimodal clusters are always separated by a region of lower density. This means that if $a_1$ and $a_2$ are the centers of two adjacent 1D clusters, there exists a cut point $a_1 < c < a_2$ such that the density near $c$ is significantly less than the densities near both $a_1$ and $a_2$. To determine this cut point, we must define the notion of density near a point. The common approach is to use either histogram binning or kernel density methods, but these require us to choose a length scale $\epsilon$. We aim to avoid this step.
 
 Instead we use a variant of Hartigan's dip test for unimodality. First we will describe the Hartigan dip test. Let $x_1 < \dots < x_n$ be the sorted (assumed distinct) real numbers (input data samples). The null hypothesis is that the set $X=\{x_j\}$ is an independent sampling of a unimodal probability density $f(x)$, which by definition is increasing on $[-\infty,c]$ and decreasing on $[c,\infty]$. Let
@@ -73,8 +57,10 @@ $$D_X=D_{X,F_X}$$
 where the approximation $F_X$  of $S_X$ is determined by down-up isotonic regression as described in Appendix [{appendixUpdown}]. Roughly speaking, $F_X$ results from a least-squares approximation of the emperical density function by a function that is monotonically increasing to left of the cutpoint, and monotonically decreasing to the right.
 
 <!-- TODO: check if this paragraph is correct compared with the actual implementation -->
-<!-- rewritten -->
 As mentioned above, Hartigan's dip test has a flaw when the number of points in one cluster (say on the far left) is much smaller than the total size $n$. This is due to the fact that the absolute size of the dip in the emperical distribution only depends on the relatively small amount of data near the interface between the two cluster, whereas the test for rejection becomes more rigorous with increasing $n$. To address this, we perform a series of dip tests of sizes $4,8,16,32,\dots, n$. We compare two tests for each size, one starting from the left and one starting from the right. If the unimodality hypothesis is rejected in any one of these tests, the algorithm stops, the null hypothesis is rejected, and the cut point for that segment is returned. Otherwise, the unimodality hypothesis is accepted.
+
+![image](https://user-images.githubusercontent.com/3679296/207963167-0a7d2584-e585-4e40-b0cc-9d060b3c7664.png)
+> TODO: update this figure to be consistent with the updated algorithm
 
 ## Clustering in more than one dimension using 1D projections
 
@@ -91,6 +77,9 @@ Similarly, there are various approaches for choosing the closest pair of cluster
 The function *InitializeLabels* creates an initial labeling (or partitioning) of the data. This may be implemented using the $k$-means algorithm with the number of initial clusters chosen to be much larger than the expected number of clusters in the dataset, the assumption being that the output should not be sensitive once $K_\text{initial}$ is large enough (see Appendix [{appendixSensitivity}]). For our tests we used the minimum of $20$ and four times the true number of clusters. Since datasets may always be constructed such that our choice of $K_\text{initial}$ is not large enough, we will seek to improve this initialization step in future work.
 
 The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering procedure described in the previous section, using a threshold of $\tau_n=\alpha/\sqrt{n}$.
+
+![decision_boundaries](https://user-images.githubusercontent.com/3679296/207963490-a9195e1e-88a3-4028-a7ac-a022cb0946cc.png)
+> TODO: update this figure and describe it
 
 ## Results
 
@@ -146,6 +135,11 @@ height: 700
 ## Many clusters
 
 ## More than two dimensions
+
+## Non-unimodal examples
+
+![example_dbscan](https://user-images.githubusercontent.com/3679296/207963843-c3ffe463-e90e-4a6b-8021-2f8571033269.png)
+> TODO: create a simulation for this type of example
 
 ## References
 
