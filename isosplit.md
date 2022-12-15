@@ -100,9 +100,10 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8edc7b6bd4a5d1419633
 <!--
 height: 700
 -->
-Figure UV: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Use the interactive controls to explore all simulations.
 
-The results of the comparison show that GMM performs best, as expected since the clusters were drawn from Gaussian distributions and the number of components was known. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set.  Generally, Isosplit performed better than then non-GMM methods when the clusters overlapped to a moderate extent. The decision boundary for k-means was incorrect due to the unequal variances between the two clusters, and DBSCAN had trouble due to the varying densities of the clusters, making it difficult to choose an ideal scale parameter.
+> Figure UV: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Use the interactive controls to explore all simulations.
+
+The results of the comparison show that GMM performs best, as expected since the clusters were drawn from Gaussian distributions and the number of components was known. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set. Generally, Isosplit performed better than the non-GMM methods when the clusters overlapped to a moderate extent. The decision boundary for k-means was incorrect due to the unequal variances between the two clusters, and DBSCAN had trouble due to the varying densities of the clusters, making it difficult to choose an ideal scale parameter.
 
 ### Anisotropic clusters
 
@@ -116,7 +117,8 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://33f1cbfa20994ee4f8ba
 <!--
 height: 700
 -->
-Figure UV: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Use the interactive controls to explore all simulations.
+
+> Figure UV: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Use the interactive controls to explore all simulations.
 
 ## Non-Gaussian clusters
 
@@ -126,7 +128,8 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://8c44f1e5789ade40df97
 <!--
 height: 700
 -->
-Figure NG: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Use the interactive controls to explore all simulations.
+
+> Figure NG: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Use the interactive controls to explore all simulations.
 
 ## Many clusters
 
