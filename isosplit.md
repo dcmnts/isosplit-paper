@@ -91,10 +91,10 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://d672ac8b1994b0f02f4e
 height: 700
 -->
 
-> Figure UV1: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Use the interactive controls to explore all simulations.
+> Figure UV1: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
 ![unequal_variances](https://user-images.githubusercontent.com/3679296/208480235-4873e081-3234-4953-a22d-e924052202f4.svg)
-> Figure UV2: Average accuracies for the various clustering algorithms as a function of separation distance in the unequal variances simulation.
+> Figure UV2: Average accuracies for the various clustering algorithms as a function of separation distance in the unequal variances simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
 
 The results of the comparison show that GMM performs best, as expected since the clusters were drawn from Gaussian distributions and the number of components was known. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set. Generally, Isosplit performed better than the non-GMM methods when the clusters overlapped to a moderate extent. The decision boundary for k-means was incorrect due to the unequal variances between the two clusters, and DBSCAN had trouble due to the varying densities of the clusters, making it difficult to choose an ideal scale parameter.
 
@@ -112,7 +112,7 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://d22b563253cb5804e4a8
 <!--
 height: 700
 -->
-> Figure AC1: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Use the interactive controls to explore all simulations.
+> Figure AC1: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
 ![anisotropic](https://user-images.githubusercontent.com/3679296/208479578-c1766b29-74a7-45b0-9e2a-91b518fb1fd3.svg)
 > Figure AC2
@@ -128,7 +128,7 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://1d0cc25804a2153f1030
 height: 700
 -->
 
-> Figure NG: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Use the interactive controls to explore all simulations.
+> Figure NG: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
 **TODO: Talk about MeanShift, SC, AC**
 
