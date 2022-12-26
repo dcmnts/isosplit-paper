@@ -57,6 +57,45 @@ In the case where the null hypothesis is rejected, a cutpoint must be found. Thi
 ![isocut_demo](https://user-images.githubusercontent.com/3679296/208520823-2a378ae7-68c8-4ce6-b1b4-2b2ba4dea168.svg)
 > Figure ISOCUT: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cutpoint. (Top) histogram of simulated bimodal distribution. (Middle) Sub-sampled densities with unimodal fit obtained from up-down isotonic regression. (Bottom) Residual densities with fit from down-up isotonic regression to determine the cutpoint (minimum).
 
+```
+# isocut algorithm
+dipscore, cutpoint = isocut(samples)
+    # subsample
+    n := ceil(sqrt(N/2)) # number of bins
+    n1 := ceil(num_bins/2) # left
+    n2 := num_bins - num_bins_1 # right
+    intervals := [1, 2, 3, ..., n1, n2, ..., 3, 2, 1]
+    intervals := intervals * (N - 1) / sum(intervals)
+    inds := [0, cumsum(intervals)]
+    X_sub := samples[inds]
+
+    # define spacings, multiplicities, densities
+    spacings := diff(X_sub)
+    multiplicities := intervals
+    densities := multiplicities / spacings
+
+    # updown isotonic regression
+    densities_unimodal_fit := isotonic_updown(densities)
+    densities_resid := densities - densities_unimodal_fit
+
+    # modified ks statistic
+    peak_index := argmax(densities_unimodal_fit)
+    dipscore, critical_range :=
+	    ks(multiplicities, densities_unimodal_fit * spacings, peak_index)
+
+    # downup isotonic regression
+    densities_resid_fit :=
+	    isotonic_downup(
+		    densities_resid[crit_rng],
+		    spacings[crit_rng]
+		)
+
+    # Determine cutpoint
+    cp_ind := argmin(densities_resid_fit)
+    cutpoint :=
+	    (X_sub[crit_rng][cp_ind] + X_sub[crit_rng][cp_ind + 1]) / 2
+```
+
 ## Clustering in more than one dimension using 1D projections
 
 In this section we address the $p$-dimensional situation ($p\geq2$) and describe an iterative procedure, termed Isosplit, in which the 1D routine is repeated as a kernel operation. The decision boundaries are less restrictive than k-means which always splits space into Voronoi cells with respect to the centroids, as illustrated in [{fig:decision_boundaries}].
@@ -75,6 +114,12 @@ The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering proced
 
 ![decision_boundaries](https://user-images.githubusercontent.com/3679296/207963490-a9195e1e-88a3-4028-a7ac-a022cb0946cc.png)
 > TODO: update this figure and describe it
+
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://7010132f3eda3345e2a12bfd2ffdd486d19e61ad&label=Bluster:%20Isosplit%20demo&s={%22algs%22:[%22Isosplit%22],%22ds%22:22}
+<!--
+height: 500
+-->
+> Illustration of the Isosplit algorithm on a dataset with four clusters. Use the controls on the left to step through the iterations.
 
 ## Results
 

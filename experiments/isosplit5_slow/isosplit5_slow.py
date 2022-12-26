@@ -1,12 +1,13 @@
 import numpy as np
-from isocut5_slow import isocut5_slow
+from .isocut5_slow import isocut5_slow
 
 def isosplit5_slow(
     X: np.ndarray, *,
     isocut_threshold=1,
     min_cluster_size=10,
     K_init=200,
-    max_iterations_per_pass=500
+    max_iterations_per_pass=500,
+    return_iterations: bool=False
 ):
     M = X.shape[0]
     N = X.shape[1]
@@ -45,6 +46,8 @@ def isosplit5_slow(
     # Keep a matrix of comparisons that have been made in this pass
     comparisons_made = np.zeros((Kmax, Kmax), dtype=np.int32) 
     
+    iterations = []
+
     passnum = 0
     while True: # passes
         passnum += 1
@@ -54,6 +57,8 @@ def isosplit5_slow(
             clusters_changed_vec_in_pass.append(False)
         iteration_number = 0
         while True: # iterations
+            if return_iterations:
+                iterations.append({'labels': [a for a in labels]})
             clusters_changed_vec_in_iteration = []
             for i in range(Kmax):
                 clusters_changed_vec_in_iteration.append(False)
@@ -154,7 +159,10 @@ def isosplit5_slow(
     # of the new clusters, recursively. Unless we only found only one cluster.
     K = np.max(labels)
 
-    return labels
+    if return_iterations:
+        return labels, iterations
+    else:
+        return labels
 
 def parcelate2(X, *,
     target_parcel_size: int,
