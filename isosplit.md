@@ -115,7 +115,7 @@ The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering proced
 ![decision_boundaries](https://user-images.githubusercontent.com/3679296/207963490-a9195e1e-88a3-4028-a7ac-a022cb0946cc.png)
 > TODO: update this figure and describe it
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://7010132f3eda3345e2a12bfd2ffdd486d19e61ad&label=Bluster:%20Isosplit%20demo&s={%22algs%22:[%22Isosplit%22],%22ds%22:22}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://7010132f3eda3345e2a12bfd2ffdd486d19e61ad&label=Bluster:%20Isosplit%20demo&s={%22algs%22:[%22Isosplit%22],%22ds%22:0}&hide=1
 <!--
 height: 500
 -->
