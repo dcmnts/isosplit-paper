@@ -196,7 +196,7 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://dd517bd8d60a3d677eb6
 height: 700
 -->
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://dd517bd8d60a3d677eb615931a4794834b82bdca&label=Bluster%3A%20Many%20clusters
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://916cfc491096d2d9ec8f38f1a7aa1340e0f5b005&label=Accuracy%20vs.%20separation%20for%20the%20many%20clusters%20simulation
 <!--
 height: 450
 -->
