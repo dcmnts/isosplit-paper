@@ -146,7 +146,7 @@ height: 700
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://078dd543d88c7545e6e26179cd8f2863721fefbc&label=Accuracy%20vs.%20separation%20for%20unequal%20variances%20simulation
 <!--
-height: 450
+height: 650
 -->
 > Figure UV2: Average accuracies for the various clustering algorithms as a function of separation distance in the unequal variances simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
 
@@ -170,7 +170,7 @@ height: 700
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://e4aff90e619e411ab79b992919fc5db11a66a1a7&label=Accuracy%20vs.%20separation%20for%20anisotropic%20simulation
 <!--
-height: 450
+height: 650
 -->
 > Figure AC2
 
@@ -198,7 +198,7 @@ height: 700
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://916cfc491096d2d9ec8f38f1a7aa1340e0f5b005&label=Accuracy%20vs.%20separation%20for%20the%20many%20clusters%20simulation
 <!--
-height: 450
+height: 650
 -->
 
 ## More than two dimensions
