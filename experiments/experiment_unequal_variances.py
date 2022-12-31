@@ -1,6 +1,6 @@
 import numpy as np
 import bluster as bl
-import matplotlib.pyplot as plt
+import figurl as fig
 from plot_accuracies import plot_accuracies_vs_separation
 
 
@@ -10,7 +10,7 @@ def main():
     sigma1 = 1
     sigma2 = 1 / 10
     cluster_size = 500
-    separations = np.arange(0, 6, 0.5)
+    separations = np.arange(0, 6.01, 0.5)
     num_trials = 3
     dbscan_eps = (5 * sigma1) / np.sqrt(cluster_size)
     dbscan_min_samples = 3
@@ -52,11 +52,15 @@ def main():
                     labels=labels2
                 ))
     
-    plot_accuracies_vs_separation(
+    title='Accuracy vs. separation for unequal variances simulation'
+    chart = plot_accuracies_vs_separation(
         study,
-        'results/unequal_variances.svg',
-        title='Accuracy vs. separation for unequal variances simulation'
+        title=title
     )
+    url = fig.Altair(chart).url(label=title)
+    print(url)
+    with open('results/unequal_variances_plot.figurl', 'w') as f:
+        f.write(url)
 
     url = study.figurl()
     print(url)

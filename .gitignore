@@ -1,3 +1,4 @@
+*.svg
 old
 *.aux
 .ipynb_checkpoints

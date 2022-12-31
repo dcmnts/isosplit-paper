@@ -1,6 +1,6 @@
 import numpy as np
 import bluster as bl
-import matplotlib.pyplot
+import figurl as fig
 from plot_accuracies import plot_accuracies_vs_separation
 
 
@@ -59,11 +59,15 @@ def main():
                     labels=labels2
                 ))
 
-    plot_accuracies_vs_separation(
+    title='Accuracy vs. separation for anisotropic simulation'
+    chart = plot_accuracies_vs_separation(
         study,
-        'results/anisotropic.svg',
-        title='Accuracy vs. separation for anisotropic simulation'
+        title=title
     )
+    url = fig.Altair(chart).url(label=title)
+    print(url)
+    with open('results/anisotropic_plot.figurl', 'w') as f:
+        f.write(url)
 
     url = study.figurl()
     print(url)

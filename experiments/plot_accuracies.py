@@ -4,7 +4,7 @@ import altair as alt
 from evaluate_clustering import evaluate_clustering
 
 
-def plot_accuracies_vs_separation(study: bl.Study, save_fname: str, *, title: str):
+def plot_accuracies_vs_separation(study: bl.Study, *, title: str):
     X = pd.DataFrame()
     X['separation'] = [ds.parameters['separation'] for ds in study.datasets]
     X['trial'] = [ds.parameters['trial'] for ds in study.datasets]
@@ -14,13 +14,47 @@ def plot_accuracies_vs_separation(study: bl.Study, save_fname: str, *, title: st
         accuracies_for_alg = [evaluate_clustering(ds.labels, clusterings_for_alg[i].labels) for i, ds in enumerate(study.datasets)]
         X[a] = accuracies_for_alg
     Y = X.melt(id_vars=['separation', 'trial'], value_vars=algorithm_names, value_name='accuracy', var_name='algorithm')
-    chart = alt.Chart(Y).mark_line(point=True).encode(
-        x='separation',
-        y='mean(accuracy)',
-        color='algorithm'
+
+    # algorithm selection
+    selection = alt.selection_multi(fields=['algorithm'], toggle="true")
+
+    # algorithm selector
+    algorithm_df = pd.DataFrame({'algorithm': algorithm_names})
+    # algorithm_condition = alt.condition(selection, alt.Color('algorithm:N'), alt.Opacity(0.2))
+    algorithm_selector = alt.Chart(algorithm_df).mark_rect().encode(
+        y='algorithm',
+        color='algorithm:N',
+        opacity=alt.condition(selection, alt.value(1), alt.value(0.2))
+    ).add_selection(selection)
+
+    # main chart
+    opacity = alt.condition(selection, alt.value(1), alt.value(0.2))
+    chart: alt.Chart = alt.Chart(Y).mark_line().encode(
+        x=alt.X('separation', title='Separation'),
+        y=alt.Y('mean(accuracy)', scale=alt.Scale(zero=False), title='Mean accuracy'),
+        color=alt.Color('algorithm', legend=None),
+        opacity=opacity
     ).properties(
-        title=title
+        title=title,
+        width=700,
+        height=450
     )
+
+    # In order to be able to control the marker size, I needed
+    # to layer another chart
+    chart = chart + alt.Chart(Y).mark_point(size=150, filled=True).encode(
+        x=alt.X('separation'),
+        y=alt.Y('mean(accuracy)'),
+        color=alt.Color('algorithm', legend=None),
+        tooltip=['algorithm', 'separation', 'mean(accuracy)'],
+        opacity=opacity
+    )
+
+    # composite chart
+    chart = (algorithm_selector | chart)
+
+    return chart
+    
     # https://stackoverflow.com/questions/62601904/altair-saver-valueerror-unsupported-format-png
     # https://github.com/altair-viz/altair_saver/issues/104
-    chart.save(save_fname)
+    # chart.save(save_fname)

@@ -1,6 +1,7 @@
 from typing import List
 import numpy as np
 import bluster as bl
+import figurl as fig
 from generate_random_clusters.generate_random_clusters import generate_random_clusters, Cluster
 from plot_accuracies import plot_accuracies_vs_separation
 
@@ -60,12 +61,16 @@ def main():
                     parameters=alg.parameters,
                     labels=labels2
                 ))
-    
-    plot_accuracies_vs_separation(
+
+    title='Accuracy vs. separation for the many clusters simulation'
+    chart = plot_accuracies_vs_separation(
         study,
-        'results/many_clusters.svg',
-        title='Accuracy vs. separation for the many clusters simulation'
+        title=title
     )
+    url = fig.Altair(chart).url(label=title)
+    print(url)
+    with open('results/many_clusters_plot.figurl', 'w') as f:
+        f.write(url)
 
     url = study.figurl()
     print(url)

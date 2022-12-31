@@ -55,6 +55,9 @@ As mentioned above, Hartigan's dip test has a flaw when the number of points in 
 In the case where the null hypothesis is rejected, a cutpoint must be found. This is obtained using down-up isotonic regression on the density residual as shown in Figurl [{ISOCUT}]. Algorithmic details are provided in the appendix.
 
 ![isocut_demo](https://user-images.githubusercontent.com/3679296/208520823-2a378ae7-68c8-4ce6-b1b4-2b2ba4dea168.svg)
+<!--
+name: isocut_demo.svg
+-->
 > Figure ISOCUT: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cutpoint. (Top) histogram of simulated bimodal distribution. (Middle) Sub-sampled densities with unimodal fit obtained from up-down isotonic regression. (Bottom) Residual densities with fit from down-up isotonic regression to determine the cutpoint (minimum).
 
 ```
@@ -113,6 +116,9 @@ The function *InitializeLabels* creates an initial labeling (or partitioning) of
 The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering procedure described in the previous section, using a threshold of $\tau_n=\alpha/\sqrt{n}$.
 
 ![decision_boundaries](https://user-images.githubusercontent.com/3679296/207963490-a9195e1e-88a3-4028-a7ac-a022cb0946cc.png)
+<!--
+name: decision_boundaries.png
+-->
 > TODO: update this figure and describe it
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://7010132f3eda3345e2a12bfd2ffdd486d19e61ad&label=Bluster:%20Isosplit%20demo&s={%22algs%22:[%22Isosplit%22],%22ds%22:0}&hide=1
@@ -138,7 +144,10 @@ height: 700
 
 > Figure UV1: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
-![unequal_variances](https://user-images.githubusercontent.com/3679296/208480235-4873e081-3234-4953-a22d-e924052202f4.svg)
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://078dd543d88c7545e6e26179cd8f2863721fefbc&label=Accuracy%20vs.%20separation%20for%20unequal%20variances%20simulation
+<!--
+height: 450
+-->
 > Figure UV2: Average accuracies for the various clustering algorithms as a function of separation distance in the unequal variances simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
 
 The results of the comparison show that GMM performs best, as expected since the clusters were drawn from Gaussian distributions and the number of components was known. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set. Generally, Isosplit performed better than the non-GMM methods when the clusters overlapped to a moderate extent. The decision boundary for k-means was incorrect due to the unequal variances between the two clusters, and DBSCAN had trouble due to the varying densities of the clusters, making it difficult to choose an ideal scale parameter.
@@ -159,7 +168,10 @@ height: 700
 -->
 > Figure AC1: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
-![anisotropic](https://user-images.githubusercontent.com/3679296/208479578-c1766b29-74a7-45b0-9e2a-91b518fb1fd3.svg)
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://e4aff90e619e411ab79b992919fc5db11a66a1a7&label=Accuracy%20vs.%20separation%20for%20anisotropic%20simulation
+<!--
+height: 450
+-->
 > Figure AC2
 
 **TODO: Talk about MeanShift, SC, AC**
@@ -184,13 +196,19 @@ https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://dd517bd8d60a3d677eb6
 height: 700
 -->
 
-![many_clusters](https://user-images.githubusercontent.com/3679296/208481087-a7de34c9-7f0a-45ec-aa54-b811f1168f6a.svg)
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://dd517bd8d60a3d677eb615931a4794834b82bdca&label=Bluster%3A%20Many%20clusters
+<!--
+height: 450
+-->
 
 ## More than two dimensions
 
 ## Non-unimodal examples
 
 ![example_dbscan](https://user-images.githubusercontent.com/3679296/207963843-c3ffe463-e90e-4a6b-8021-2f8571033269.png)
+<!--
+name: example_dbscan.png
+-->
 > TODO: create a simulation for this type of example
 
 ## References
