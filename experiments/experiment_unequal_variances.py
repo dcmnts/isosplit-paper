@@ -10,7 +10,7 @@ def main():
     sigma1 = 1
     sigma2 = 1 / 10
     cluster_size = 500
-    separations = np.arange(0, 6.01, 0.5)
+    separations = np.arange(0, 6.01, 0.25)
     num_trials = 3
     dbscan_eps = (5 * sigma1) / np.sqrt(cluster_size)
     dbscan_min_samples = 3
@@ -19,7 +19,8 @@ def main():
         bl.AgglomerativeClusteringAlgorithm(name='Agg*', n_clusters=2),
         bl.DBSCANAlgorithm(eps=dbscan_eps, min_samples=dbscan_min_samples, name='DBSCAN*'),
         bl.GMMAlgorithm(n_components=2, name='GMM*'),
-        bl.Isosplit5Algorithm(name='Isosplit'),
+        # bl.Isosplit5Algorithm(name='Isosplit5'),
+        bl.Isosplit6Algorithm(name='Isosplit'),
         bl.KMeansAlgorithm(n_clusters=2, name='K-means*'),
         # bl.MeanShiftAlgorithm(name='MeanShift'),
         bl.RodriguezLaioAlgorithm(name='RL*'),

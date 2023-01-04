@@ -1,9 +1,9 @@
 import numpy as np
-from .isocut5_slow import isocut5_slow
+from .isocut6_slow import isocut6_slow
 
-def isosplit5_slow(
+def isosplit6_slow(
     X: np.ndarray, *,
-    isocut_threshold=1,
+    isocut_threshold=2,
     min_cluster_size=10,
     K_init=200,
     max_iterations_per_pass=500,
@@ -503,9 +503,9 @@ def merge_test(X1, X2, centroid1, centroid2, covmat1, covmat2, isocut_threshold:
         for m in range(M):
             V[m] /= np.sqrt(sumsqr)
     
-    projection1 = np.zeros((N1,), dtype=np.float32)
-    projection2 = np.zeros((N2,), dtype=np.float32)
-    projection12 = np.zeros((N1 + N2,), dtype=np.float32)
+    projection1 = np.zeros((N1,), dtype=np.float64)
+    projection2 = np.zeros((N2,), dtype=np.float64)
+    projection12 = np.zeros((N1 + N2,), dtype=np.float64)
 
     for i in range(N1):
         tmp = 0
@@ -520,7 +520,7 @@ def merge_test(X1, X2, centroid1, centroid2, covmat1, covmat2, isocut_threshold:
         projection2[i] = tmp
         projection12[N1 + i] = tmp
     
-    dipscore, cutpoint = isocut5_slow(projection12)
+    dipscore, cutpoint = isocut6_slow_no_subsampling(projection12)
 
     if dipscore < isocut_threshold:
         do_merge = True

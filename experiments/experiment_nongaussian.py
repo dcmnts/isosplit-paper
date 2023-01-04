@@ -28,7 +28,7 @@ def main():
         bl.AgglomerativeClusteringAlgorithm(name='Agg*', n_clusters=2),
         bl.DBSCANAlgorithm(eps=dbscan_eps, min_samples=dbscan_min_samples, name='DBSCAN*'),
         bl.GMMAlgorithm(n_components=2, name='GMM*'),
-        bl.Isosplit5Algorithm(name='Isosplit'),
+        bl.Isosplit6Algorithm(name='Isosplit'),
         bl.KMeansAlgorithm(n_clusters=2, name='K-means*'),
         # bl.MeanShiftAlgorithm(name='MeanShift'),
         bl.RodriguezLaioAlgorithm(name='RL*'),

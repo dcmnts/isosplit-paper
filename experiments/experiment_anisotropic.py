@@ -7,7 +7,7 @@ from plot_accuracies import plot_accuracies_vs_separation
 def main():
     np.random.seed(0)
 
-    separations = np.arange(2.5, 8.5, 0.5)
+    separations = np.arange(2.5, 8.5, 0.25)
 
     sigma = 1
     anisotropy_factor = 10
@@ -19,7 +19,7 @@ def main():
         bl.AgglomerativeClusteringAlgorithm(name='Agg*', n_clusters=3),
         bl.DBSCANAlgorithm(eps=dbscan_eps, min_samples=dbscan_min_samples, name='DBSCAN*'),
         bl.GMMAlgorithm(n_components=3, name='GMM*', covariance_type='full'),
-        bl.Isosplit5Algorithm(name='Isosplit'),
+        bl.Isosplit6Algorithm(name='Isosplit'),
         bl.KMeansAlgorithm(n_clusters=3, name='K-means*'),
         # bl.MeanShiftAlgorithm(name='MeanShift'),
         bl.RodriguezLaioAlgorithm(name='RL*'),

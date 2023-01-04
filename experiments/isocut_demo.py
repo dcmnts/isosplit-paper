@@ -1,252 +1,86 @@
 import matplotlib.pyplot as plt
-
-from typing import Union
 import numpy as np
+from isosplit5_slow.isocut6_slow import jisotonic5_updown, compute_ks5, jisotonic5_downup
 
-def jisotonic5_updown(values: np.array, weights: Union[np.array, None]):
-    N = len(values)
-    values_reversed = values[::-1]
-    if weights is not None:
-        weights_reversed = weights[::-1]
-    else:
-        weights_reversed = None
-    B1, MSE1 = jisotonic5(values, weights)
-    B2, MSE2 = jisotonic5(values_reversed, weights_reversed)
+def isocut6_slow_demo(samples: np.array, *, xlim, output_fname: str, create_figure: bool):
+    if create_figure:
+        fig, (ax1, ax2, ax3) = plt.subplots(3, figsize=(8, 8))
+        annotation_xy = (10, 100)
 
-    MSE = MSE1 + MSE2[::-1]
-    best_ind = np.argmin(MSE)
-
-    B1x, MSE1x = jisotonic5(values[:(best_ind + 1)], weights[:best_ind + 1])
-    B2x, MSE2x = jisotonic5(values_reversed[:(N - best_ind - 1)], weights_reversed[:(N - best_ind - 1)])
-
-    out = np.zeros((N,), dtype=np.float32)
-    out[:(best_ind + 1)] = B1x
-    out[N-1:best_ind:-1] = B2x
-
-    return out
-
-def jisotonic5_downup(values: np.array, weights: Union[np.array, None]):
-    return -jisotonic5_updown(-values, weights)
-
-def jisotonic5(values: np.array, weights: Union[np.array, None]):
-    N = len(values)
-    if N == 0:
-        return np.array((0,), dtype=np.float32), np.array((0,), dtype=np.float32)
-    
-    unweighted_count0 = np.zeros((N,), dtype=np.int32)
-    count0 = np.zeros((N,), dtype=np.float32)
-    sum0 = np.zeros((N,), dtype=np.float32)
-    sumsqr0 = np.zeros((N,), dtype=np.float32)
-    MSE0 = np.zeros((N,), dtype=np.float32)
-    BB = np.zeros((N,), dtype=np.float32)
-
-    last_index = 0
-    
-    if weights is not None:
-        w0 = weights[0]
-    else:
-        w0 = 1
-    
-    count0[last_index] = w0
-    unweighted_count0[last_index] = 1
-    sum0[last_index] = values[0] * w0
-    sumsqr0[last_index] = values[0] * values[0] * w0
-    MSE0[0] = 0
-
-    for j in range(1, N):
-        last_index += 1
-        unweighted_count0[last_index] = 1
-        if weights is not None:
-            w0 = weights[j]
-        else:
-            w0 = 1
-        count0[last_index] = w0
-        sum0[last_index] = values[j] * w0
-        sumsqr0[last_index] = values[j] * values[j] * w0;
-        MSE0[j] = MSE0[j - 1]
-        while True:
-            if last_index <= 0:
-                break;
-            if sum0[last_index - 1] / count0[last_index - 1] < sum0[last_index] / count0[last_index]:
-                break;
-            else:
-                prevMSE = sumsqr0[last_index - 1] - sum0[last_index - 1] * sum0[last_index - 1] / count0[last_index - 1]
-                prevMSE += sumsqr0[last_index] - sum0[last_index] * sum0[last_index] / count0[last_index]
-                unweighted_count0[last_index - 1] += unweighted_count0[last_index]
-                count0[last_index - 1] += count0[last_index]
-                sum0[last_index - 1] += sum0[last_index]
-                sumsqr0[last_index - 1] += sumsqr0[last_index]
-                newMSE = sumsqr0[last_index - 1] - sum0[last_index - 1] * sum0[last_index - 1] / count0[last_index - 1]
-                MSE0[j] += newMSE - prevMSE
-                last_index -= 1
-
-    ii = 0
-    for k in range(last_index + 1):
-        for cc in range(unweighted_count0[k]):
-            BB[ii + cc] = sum0[k] / count0[k]
-        ii += unweighted_count0[k]
-    
-    return BB, MSE0
-
-def compute_ks5(counts1, counts2, peak_index):
-    N = len(counts1)
-    critical_range_min = 0
-    critical_range_max = N - 1 # should get over-written!
-    ks_best = -1
-
-    # from the left
-    counts1_left = np.zeros((peak_index + 1,), dtype=np.int32)
-    counts2_left = np.zeros((peak_index + 1,), dtype=np.int32)
-    for i in range(peak_index + 1):
-        counts1_left[i] = counts1[i]
-        counts2_left[i] = counts2[i]
-    len0 = peak_index + 1
-    while (len0 >= 4) or (len0 == peak_index + 1):
-        ks0 = compute_ks4(counts1_left, counts2_left)
-        if ks0 > ks_best:
-            critical_range_min = int(0)
-            critical_range_max = int(len0 - 1)
-            ks_best = ks0
-        len0 = len0 / 2;
-
-    # from the right
-    counts1_right = np.zeros((N - peak_index,), dtype=np.int32)
-    counts2_right = np.zeros((N - peak_index,), dtype=np.int32)
-    for i in range(N - peak_index):
-        counts1_right[i] = counts1[N - 1 - i]
-        counts2_right[i] = counts2[N - 1 - i]
-    len0 = N - peak_index
-    while (len0 >= 4) or (len0 == N - peak_index):
-        ks0 = compute_ks4(counts1_right, counts2_right)
-        if ks0 > ks_best:
-            critical_range_min = int(N - len0)
-            critical_range_max = int(N - 1)
-            ks_best = ks0
-        len0 = len0 / 2
-
-    return ks_best, critical_range_min, critical_range_max
-
-def compute_ks4(counts1, counts2):
-    N = len(counts1)
-
-    sum_counts1 = np.sum(counts1)
-    sum_counts2 = np.sum(counts2)
-
-    cumsum_counts1 = 0
-    cumsum_counts2 = 0
-
-    max_diff = 0
-    for i in range(N):
-        cumsum_counts1 += counts1[i]
-        cumsum_counts2 += counts2[i]
-        diff = np.abs(cumsum_counts1 / sum_counts1 - cumsum_counts2 / sum_counts2)
-        if (diff > max_diff):
-            max_diff = diff
-
-    return max_diff * np.sqrt((sum_counts1 + sum_counts2) / 2)
-
-def isocut5_slow(samples: np.array, *, xlim, output_fname: str):
-    fig, (ax1, ax2, ax3) = plt.subplots(3, figsize=(8, 8))
-    
     N = len(samples)
-    samples_sorted = np.sort(samples)
+    X = np.sort(samples)
+
+    if create_figure:
+        ax1.hist(X, 100, color='lightgray', edgecolor='black');
+        ax1.set_xlim(xlim)
+        ax1.set_xticks([])
+        ax1.set_ylabel('Count')
+        ax1.annotate(text='A', xy=annotation_xy, xycoords='axes pixels', fontsize=20)
     
-    ax1.hist(samples_sorted, 100, color='lightgray', edgecolor='black');
-    ax1.set_xlim(xlim)
-    ax1.set_xticks([])
-    ax1.set_ylabel('Count')
-
-    ##############################################
-    # SUBSAMPLING
-    # num_bins is sqrt(N/2) * factor
-    num_bins_factor = 1
-    num_bins = int(np.ceil(np.sqrt(N * 1.0 / 2) * num_bins_factor))
-
-    num_bins_1 = int(np.ceil(num_bins / 2)) # left bins
-    num_bins_2 = num_bins - num_bins_1 # right bins
-
-    # I guess this is the same as num_bins
-    num_intervals = num_bins_1 + num_bins_2
-
-    # what is this? the number of samples in each interval?
-    intervals = np.zeros((num_intervals, ), dtype=np.float32)
-    for i in range(num_bins_1):
-        intervals[i] = i + 1
-    for i in range(num_bins_2):
-        intervals[num_intervals - 1 - i] = i + 1
-
-    alpha = (N - 1) / np.sum(intervals)
-
-    # now we scale this such that sum(intervals) = N - 1
-    intervals = intervals * alpha
-
-    # number of subsamples
-    N_sub = num_intervals + 1
-
-    # indices of the subsampled samples
-    inds = np.zeros((N_sub,), dtype=np.float32)
-    inds[0] = 0
-    for i in range(num_intervals):
-        inds[i + 1] = inds[i] + intervals[i]
-    
-    # These are the subsampled samples
-    X_sub = np.zeros((N_sub,), dtype=np.float32)
-    for i in range(N_sub):
-        X_sub[i] = samples_sorted[int(inds[i])]
-    ##################################################
-
-    spacings = X_sub[1:] - X_sub[:(N_sub - 1)]
-    multiplicities = np.floor(inds[1:]) - np.floor(inds[:(N_sub - 1)])
-    densities = multiplicities / spacings
+    spacings = X[1:] - X[:(N - 1)]
+    multiplicities = np.ones((N-1,))
+    if np.min(spacings) == 0:
+        raise Exception('Spacings are not allowed to be zero')
+    log_densities = np.log(multiplicities / spacings)
 
     # Unimodal fit to densities
-    densities_unimodal_fit = jisotonic5_updown(densities, multiplicities)
-    
-    ax2.bar(X_sub[0:(N_sub - 1)], densities, width=spacings, align='edge', edgecolor='black', color='lightgray');
-    ax2.plot((X_sub[1:] + X_sub[0:(N_sub - 1)]) / 2, densities_unimodal_fit, c='blue') 
-    ax2.set_xlim(xlim)
-    ax2.set_xticks([])
-    ax2.set_ylabel('Density')
+    log_densities_unimodal_fit = jisotonic5_updown(log_densities, weights=None)
 
-    densities_resid = densities - densities_unimodal_fit
+    if create_figure:
+        ax2.plot((X[1:] + X[0:(N - 1)]) / 2, log_densities, c='gray') 
+        ax2.plot((X[1:] + X[0:(N - 1)]) / 2, log_densities_unimodal_fit, c='red') 
+        ax2.set_xlim(xlim)
+        ax2.set_xticks([])
+        ax2.set_ylabel('Log density')
+        ax2.annotate(text='B', xy=annotation_xy, xycoords='axes pixels', fontsize=20)
 
-    densities_unimodal_fit_times_spacings = densities_unimodal_fit * spacings
+    densities_unimodal_fit_times_spacings = np.exp(log_densities_unimodal_fit) * spacings
 
-    peak_index = np.argmax(densities_unimodal_fit)
+    peak_index = np.argmax(log_densities_unimodal_fit)
 
     # dipscore_out
     dipscore_out, critical_range_min, critical_range_max = compute_ks5(multiplicities, densities_unimodal_fit_times_spacings, peak_index)
 
-    densities_resid_on_critical_range = densities_resid[critical_range_min:(critical_range_max + 1)]
-    weights_for_downup = spacings[critical_range_min:(critical_range_max + 1)]
+    log_densities_resid = log_densities - log_densities_unimodal_fit
+    log_densities_resid_on_critical_range = log_densities_resid[critical_range_min:(critical_range_max + 1)]
 
-    densities_resid_fit_on_critical_range = jisotonic5_downup(densities_resid_on_critical_range, weights_for_downup)
-    
-    ax3.bar(X_sub[critical_range_min:critical_range_max + 1], densities_resid_on_critical_range, width=spacings[critical_range_min:critical_range_max + 1], align='edge', edgecolor='black', color='lightgray');
-    ax3.plot((X_sub[critical_range_min + 1:critical_range_max + 2] + X_sub[critical_range_min:critical_range_max + 1]) / 2, densities_resid_fit_on_critical_range, c='blue') 
-    ax3.set_xlim(xlim)
-    ax3.set_ylabel('Density residual')
-    
-    plt.savefig(output_fname)
+    log_densities_resid_fit_on_critical_range = jisotonic5_downup(log_densities_resid_on_critical_range, weights=None)
 
-    cutpoint_index = np.argmin(densities_resid_fit_on_critical_range)
+    if create_figure:
+        ax3.plot((X[:(N- 1)] + X[1:]) / 2, log_densities_resid, c='gray') 
+        ax3.plot((X[critical_range_min + 1:critical_range_max + 2] + X[critical_range_min:critical_range_max + 1]) / 2, log_densities_resid_fit_on_critical_range, c='red') 
+        ax3.set_xlim(xlim)
+        # ax3.set_ylim([-500, 500])
+        ax3.set_ylabel('Log density residual')
+        ax3.annotate(text='C', xy=annotation_xy, xycoords='axes pixels', fontsize=20)
+    
+        plt.savefig(output_fname)
+    
+    cutpoint_index = np.argmin(log_densities_resid_fit_on_critical_range)
 
     # cutpoint_out
-    cutpoint_out = 0.5 * (X_sub[critical_range_min + cutpoint_index] + X_sub[critical_range_min + cutpoint_index + 1])
+    cutpoint_out = 0.5 * (X[critical_range_min + cutpoint_index] + X[critical_range_min + cutpoint_index + 1])
 
     return dipscore_out, cutpoint_out
 
-np.random.seed(2)
+if __name__ == '__main__':
+    np.random.seed(1)
 
-N1 = 1000
-N2 = 1000
-N = N1 + N2
-samples = np.zeros((N,), dtype=np.float32)
-for j in range(N):
-    if j < N1:
-        samples[j] = np.random.randn() - 2
-    else:
-        samples[j] = np.random.randn() + 2
+    N1 = 500
+    N2 = 1000
+    N = N1 + N2
+    separation = 4
+    samples = np.zeros((N,), dtype=np.float64)
+    for j in range(N):
+        if j < N1:
+            samples[j] = np.random.randn() - separation / 2
+        else:
+            samples[j] = np.random.randn() + separation / 2
 
-
-dipscore_out, cutpoint_out = isocut5_slow(samples, xlim=[-5.5, 5.5], output_fname='results/isocut_demo.svg');
+    dipscore_out, cutpoint_out = isocut6_slow_demo(
+        samples,
+        xlim=[-5.5, 5.5],
+        output_fname='results/isocut_demo.svg',
+        create_figure=True
+    )
+    print(f'dipscore: {dipscore_out}; Cutpoint: {cutpoint_out}')

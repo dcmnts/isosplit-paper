@@ -28,13 +28,13 @@ We first describe an algorithm for splitting a 1D sample into unimodal clusters.
 
 ## Clustering in one dimension
 
-Any approach overcoming the above limitations must at least be able to do so in the simplest, 1D case. Here we present a non-parametric approach to 1D clustering utilizing a statistical test for unimodality and isotonic regression. This procedure will then be used as the basis for the more general situation ($p\geq2$) described in Section [{isosplit-algorithm}].
+Any approach overcoming the above limitations must at least be able to do so in the 1D case. Here we present a non-parametric approach to 1D clustering utilizing a statistical test for unimodality and isotonic regression. This procedure will then be used as the basis for the more general situation ($p\geq 2$) described in Section [{isosplit-algorithm}].
   
-Clustering 1D data is special due to the fact that the input data can be sorted. The task then becomes finding the $K-1$ cut points (real numbers between adjacent datapoints) that determine the $K$ clusters. We assume that the clusters are unimodal, meaning that the density is lower between adjacent clusters. For simplicity we will describe an algorithm for deciding whether there is one cluster, or more than one cluster. In the latter case, a single cut point is determined representing the boundary separating one pair of adjacent clusters. Once the data have been split, the same algorithm may then be applied recursively on the left and right portions leading to further subdivisions, converging when no more splitting occurs. Thus, in addition to being the basis for higher dimensional clustering, the algorithm described here may also be used as a basis for general 1D clustering.
+Clustering of 1D data is special due to the fact that the input data can be sorted. The task then becomes finding the $K-1$ cut points (real numbers between adjacent datapoints) that determine the $K$ clusters. We assume that the clusters are unimodal, meaning that the density is lower between adjacent clusters. We will describe an algorithm for deciding whether there is one cluster, or more than one cluster. In the latter case, a single cut point is determined representing the boundary separating one pair of adjacent clusters. Once the data have been split, the same algorithm may then be applied recursively on the left and right portions leading to further subdivisions, converging when no more splitting occurs. Thus, in addition to being the basis for higher dimensional clustering, the algorithm described here could also be used as a basis for general 1D clustering.
 
-We assume that two adjacent unimodal clusters are always separated by a region of lower density. This means that if $a_1$ and $a_2$ are the centers of two adjacent 1D clusters, there exists a cut point $a_1 < c < a_2$ such that the density near $c$ is significantly less than the densities near both $a_1$ and $a_2$. To determine this cut point, we must define the notion of density near a point. The common approach is to use either histogram binning or kernel density methods, but these require us to choose a length scale $\epsilon$. We aim to avoid this step.
+We assume that two adjacent unimodal clusters are always separated by a region of lower density. This means that if $a_1$ and $a_2$ are the core points of two adjacent 1D clusters, there exists a cut point $a_1 < c < a_2$ such that the density near $c$ is significantly less than the densities near both $a_1$ and $a_2$. To determine this cut point, we must define the notion of density near a point. The common approach is to use either histogram binning or kernel density methods, but these require us to choose a length scale $\epsilon$. We aim to avoid this step.
 
-Instead we use a variant of Hartigan's dip test for unimodality. First we will describe the Hartigan dip test. Let $x_1 < \dots < x_n$ be the sorted (assumed distinct) real numbers (input data samples). The null hypothesis is that the set $X=\{x_j\}$ is an independent sampling of a unimodal probability density $f(x)$, which by definition is increasing on $[-\infty,c]$ and decreasing on $[c,\infty]$. Let
+Instead we use a variant of Hartigan's dip test for unimodality. First we will describe the Hartigan dip test. Let $x_1 < \dots < x_n$ be the sorted (assumed distinct) real numbers (input data samples). The null hypothesis is that the set $X=\{x_j\}$ is an independent sampling from a unimodal probability density $f(x)$, which by definition is increasing on $[-\infty,c]$ and decreasing on $[c,\infty]$ for some $c$. Let
 
 $$S_X(x)=\#\{j:x_j\leq x\}$$
 
@@ -44,76 +44,67 @@ $$D_{X, F} = \frac{1}{\sqrt{n}}\sup_x{|F(x)-S_X(x)|}$$
 
 In Hartigan's method, the dip statistic is
 $$\tilde{D}_X=\inf_F{D_{X,F}},$$
-which is used to either reject or accept the unimodality null hypothesis. Hartigan's original paper outlines a method for implementing this infimum, though it is far from straightforward. The time complexity has not been carefully evaluated, and there are very few, if any, open source software packages that implement it. But there are other reasons why we use a variant of Hartigan's test rather than the original algorithm. First, Hartigan's test only produces an accept/reject result, and does not supply an optimal cut point separating the clusters, which we need for the clustering. Second, there is a problem with Hartigan's test in the case where the number of points in one cluster (say on the far left) is very small compared with the total size $n$, as described in more detail below.
+which is used to either reject or accept the unimodality null hypothesis. Hartigan's original paper outlines a method for implementing this infimum, though it is far from straightforward. The time complexity has not been carefully evaluated, and there are very few, if any, open source software packages that implement it as described. But there are other reasons why we use a variant of Hartigan's test rather than the original algorithm. First, Hartigan's test only produces an accept/reject result, and does not supply an optimal cut point separating the clusters, which we need for the clustering. Second, there is a problem with Hartigan's test in the case where the number of points in one cluster (say on the far left) is very small compared with the total size $n$, as described in more detail below.
 
-Here we define a slightly different statistic
+Here we define a different statistic
 $$D_X=D_{X,F_X}$$
-where the approximation $F_X$  of $S_X$ is determined by down-up isotonic regression as described in Appendix [{appendixUpdown}]. Roughly speaking, $F_X$ results from a least-squares approximation of the emperical density function by a function that is monotonically increasing to left of the cutpoint, and monotonically decreasing to the right (see Figure [{ISOCUT}]).
+where the approximation $F_X$  of $S_X$ is determined by up-down isotonic regression as shown in Algorithm 1 and described in Appendix [{appendixUpdown}]. Roughly speaking, $F_X$ results from an approximation of the emperical density function by a function that is monotonically increasing to the left of a critical point, and monotonically decreasing to the right (see Figure [{ISOCUT}]).
 
-As mentioned above, Hartigan's dip test has a flaw when the number of points in one cluster (say on the far left) is much smaller than the total size $n$. This is due to the fact that the absolute size of the dip in the emperical distribution only depends on the relatively small amount of data near the interface between the two cluster, whereas the test for rejection becomes more rigorous with increasing $n$. To address this, we perform a series of dip tests of sizes $\lfloor n/2 \rfloor, \lfloor n/4 \rfloor, \lfloor n/8 \rfloor, \dots$. We compare two tests for each size, one starting from the left and one starting from the right. If the unimodality hypothesis is rejected in any one of these tests, the algorithm stops, the null hypothesis is rejected, and the cut point for that segment is returned. Otherwise, the unimodality hypothesis is accepted. A more detailed description of this procedure is provided in Appendix XX.
+As mentioned above, Hartigan's dip test has a flaw when the number of points in one cluster (say on the far left) is much smaller than the total size $n$. This is due to the fact that the absolute size of the dip in the empirical distribution only depends on the relatively small amount of data near the interface between the two cluster, whereas the test for rejection becomes more rigorous with increasing $n$ (note the normalizing factor of $\frac{1}{\sqrt{n}}$). To address this, we perform a series of dip tests of sizes $\lfloor n/2 \rfloor, \lfloor n/4 \rfloor, \lfloor n/8 \rfloor, \dots$. We compare two tests for each size, one starting from the left and one starting from the right. If the unimodality hypothesis is rejected in any one of these tests, the null hypothesis is rejected. Otherwise, the unimodality hypothesis is accepted. A more detailed description of this procedure is provided in Appendix XX. This procedure is encapsulated in the `ks_adj` function in Algorithm 1.
 
-In the case where the null hypothesis is rejected, a cutpoint must be found. This is obtained using down-up isotonic regression on the density residual as shown in Figurl [{ISOCUT}]. Algorithmic details are provided in the appendix.
+In the case where the null hypothesis is rejected, a cutpoint must be found. This is obtained using down-up isotonic regression on the density residual as given in Algorithm 1 and shown in Figurl [{ISOCUT}]. Further algorithmic details are provided in the appendix.
 
-![isocut_demo](https://user-images.githubusercontent.com/3679296/208520823-2a378ae7-68c8-4ce6-b1b4-2b2ba4dea168.svg)
+![isocut_demo](https://user-images.githubusercontent.com/3679296/210560407-104e0bb3-ed4f-49d7-94f8-e31d85f647f6.svg)
 <!--
 name: isocut_demo.svg
 -->
-> Figure ISOCUT: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cutpoint. (Top) histogram of simulated bimodal distribution. (Middle) Sub-sampled densities with unimodal fit obtained from up-down isotonic regression. (Bottom) Residual densities with fit from down-up isotonic regression to determine the cutpoint (minimum).
+> Figure ISOCUT: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cutpoint. (A) histogram of a simulated bimodal distribution. (B) Estimated log density with unimodal fit obtained from up-down isotonic regression. (C) Residual log density with fit from down-up isotonic regression to determine the cutpoint at the minimum.
 
-```
+```python
 # isocut algorithm
 dipscore, cutpoint = isocut(samples)
-    # subsample
-    n := ceil(sqrt(N/2)) # number of bins
-    n1 := ceil(num_bins/2) # left
-    n2 := num_bins - num_bins_1 # right
-    intervals := [1, 2, 3, ..., n1, n2, ..., 3, 2, 1]
-    intervals := intervals * (N - 1) / sum(intervals)
-    inds := [0, cumsum(intervals)]
-    X_sub := samples[inds]
+    # define spacings, multiplicities
+    s := diff(samples)
+    m := [1, 1, ..., 1]
 
-    # define spacings, multiplicities, densities
-    spacings := diff(X_sub)
-    multiplicities := intervals
-    densities := multiplicities / spacings
+    # compute log densities
+    d := log(m / s)
 
-    # updown isotonic regression
-    densities_unimodal_fit := isotonic_updown(densities)
-    densities_resid := densities - densities_unimodal_fit
+    # up-down isotonic regression
+    d_uni_fit := isotonic_updown(d)
 
     # modified ks statistic
-    peak_index := argmax(densities_unimodal_fit)
-    dipscore, critical_range :=
-	    ks(multiplicities, densities_unimodal_fit * spacings, peak_index)
+    peak_index := argmax(d_uni_fit)
+    dipscore, critical_range := ks_adj(m, exp(d_uni_fit) * s, peak_index)
 
     # downup isotonic regression
-    densities_resid_fit :=
-	    isotonic_downup(
-		    densities_resid[crit_rng],
-		    spacings[crit_rng]
-		)
+    d_resid := d - d_uni_fit
+    d_resid_fit := isotonic_downup(d_resid[crit_rng])
 
     # Determine cutpoint
-    cp_ind := argmin(densities_resid_fit)
+    cp_ind := argmin(d_resid_fit)
     cutpoint :=
-	    (X_sub[crit_rng][cp_ind] + X_sub[crit_rng][cp_ind + 1]) / 2
+	    (samples[crit_rng][cp_ind] + samples[crit_rng][cp_ind + 1]) / 2
 ```
+> Algorithm 1: Isocut tests whether a 1D sampling of datapoints arises from a multi-modal distribution. In the case where the unimodality hypothesis is rejected, an optimal cutpoint is found that separates regions of relatively high density. Details on the `ks_adj`, `isotonic_updown` and `isotonic_downup` functions are provided in the appendix.
 
 ## Clustering in more than one dimension using 1D projections
 
-In this section we address the $p$-dimensional situation ($p\geq2$) and describe an iterative procedure, termed Isosplit, in which the 1D routine is repeated as a kernel operation. The decision boundaries are less restrictive than k-means which always splits space into Voronoi cells with respect to the centroids, as illustrated in [{fig:decision_boundaries}].
+In this section we address the $p$-dimensional situation ($p\geq 2$) and describe an iterative procedure, termed Isosplit, in which the 1D routine is repeated as a kernel operation. The decision boundaries are less restrictive than k-means which always splits space into Voronoi cells with respect to the centroids, as illustrated in [{fig:decision_boundaries}].
 
-The proposed procedure is outlined in Algorithm [{alg:main_algorithm}]. The input is a collection of $n$ points in $\mathbb{R}^p$, and the output is the collection of corresponding labels (or cluster memberships). The approach is similar to agglomerative hierarchical methods in that we start with a large number of clusters (output of *InitializeLabels* and iteratively reduce the number of clusters until convergence. However, in addition to merging clusters, the algorithm may also redistribute datapoints between adjacent clusters. This is in contrast to agglomerative hierarchical methods. At each iteration, the two [{closest}] clusters (that have not yet been handled) are selected and all datapoints from the two sets are projected onto a line orthogonal to the proposed hyperplane of separation. The 1D split test from the previous section is applied (see above) and then the points are redistributed based on the optimal cut point, or if no statistically significant cut point is found, the clusters are merged. This procedure is repeated until all pairs of clusters have been handled.
+The proposed procedure is outlined in Algorithm [{alg:main_algorithm}]. The input is a collection of $n$ points in $\mathbb{R}^p$, and the output is the collection of corresponding labels (or cluster memberships). The approach is similar to agglomerative hierarchical methods in that we start with a large number of clusters (output of `initialize_labels` and iteratively reduce the number of clusters until convergence. However, in addition to merging clusters, the algorithm may also redistribute datapoints between adjacent clusters. This is in contrast to agglomerative hierarchical methods. At each iteration, pairs of nearby clusters are selected and, for each pair, all datapoints from the two sets are projected onto a line orthogonal to the proposed hyperplane of separation. The 1D split test from the previous section is applied to the project data (see above) and then the points are redistributed based on the optimal cut point, or if no statistically significant cut point is found, the clusters are merged. This procedure is repeated until all pairs of clusters have been handled.
 
-<!-- Algorithm goes here -->
+```python
+Isosplit algorithm goes here
+```
 
-The best line of projection may be chosen in various ways. The simplest approach is to use the line connecting the centroids of the two clusters of interest. Although this choice may be sufficient in most situations, the optimal hyperplane of separation may not be orthogonal to this line. Instead, the approach we used in our implementation is to estimate the covariance matrix of the data in the two clusters (assuming Gaussian distributions with equal variances) and use this to whiten the data prior to using the above method. The function *GetProjectionDirection* in [{alg:main_algorithm}] returns a unit vector $V$ representing the direction of the optimal projection line, and the function *Project* simply returns the inner product of this vector with each datapoint.
+The best line of projection may be chosen in various ways. The simplest approach is to use the line connecting the centroids of the two clusters of interest. Although this choice may be sufficient in most situations, the optimal hyperplane of separation may not be orthogonal to this line. Instead, the approach we used in our implementation is to estimate the covariance matrix of the data in the two clusters (assuming Gaussian distributions with equal variances) and use this to whiten the data prior to using the above method. The function `get_projection_direction` in [{alg:main_algorithm}] returns a unit vector $V$ representing the direction of the optimal projection line, and the function `project` simply returns the inner product of this vector with each datapoint.
 
-Similarly, there are various approaches for choosing the closest pair of clusters at each iteration *FindClosestPair*. One way is to minimize the distance between the two cluster centroids. Note, however, that we don't want to repeat the same 1D kernel operation more than once. Therefore, the closest pair that has not yet been handled is chosen. In order to avoid excessive iterations we used a heuristic for determining whether a particular cluster pair (or something very close to it) had been previously attempted.
+There are also various approaches for choosing the closest pairs of clusters at each iteration `find_closest_pairs`. One way is to select pairs that minimize distances between cluster centroids. Note, however, that we don't want to repeat the same 1D kernel operation more than once. Therefore, the mutually closest pairs that have not yet been handled are chosen. Further details are provided in the appendix.
 
-The function *InitializeLabels* creates an initial labeling (or partitioning) of the data. This may be implemented using the $k$-means algorithm with the number of initial clusters chosen to be much larger than the expected number of clusters in the dataset, the assumption being that the output should not be sensitive once $K_\text{initial}$ is large enough (see Appendix [{appendixSensitivity}]). For our tests we used the minimum of $20$ and four times the true number of clusters. Since datasets may always be constructed such that our choice of $K_\text{initial}$ is not large enough, we will seek to improve this initialization step in future work.
+The function `initialize_labels` creates an initial labeling (or partitioning) of the data. This may be implemented using the $k$-means algorithm with the number of initial clusters chosen to be much larger than the expected number of clusters in the dataset, the assumption being that the output should not be sensitive once $K_\text{initial}$ is large enough (see Appendix [{appendixSensitivity}]). For our tests we used the minimum of $20$ and four times the true number of clusters. Since datasets may always be constructed such that our choice of $K_\text{initial}$ is not large enough, we will seek to improve this initialization step in future work.
 
-The critical step is *ComputeOptimalCutpoint*, which is the 1D clustering procedure described in the previous section, using a threshold of $\tau_n=\alpha/\sqrt{n}$.
+The critical step is `compute_optimal_cutpoint`, which is the 1D clustering procedure described in the previous section, using a threshold of XYZ.
 
 ![decision_boundaries](https://user-images.githubusercontent.com/3679296/207963490-a9195e1e-88a3-4028-a7ac-a022cb0946cc.png)
 <!--
@@ -137,14 +128,14 @@ K-means clustering assumes equal variances for the clusters, which leads to inco
 
 To illustrate this, we simulated two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). The results are shown in Figures UV1 and UV2.
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://d672ac8b1994b0f02f4e19370f1de3a12077ac70&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:13}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://d764c70730a81d0e6fcd16eadcb2c4106352f3bc&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:26}
 <!--
 height: 700
 -->
 
 > Figure UV1: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
-https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://078dd543d88c7545e6e26179cd8f2863721fefbc&label=Accuracy%20vs.%20separation%20for%20unequal%20variances%20simulation
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://44257c70cfb3948bf51b1474855d97d925ddbff1&label=Accuracy%20vs.%20separation%20for%20unequal%20variances%20simulation
 <!--
 height: 550
 -->
@@ -162,13 +153,13 @@ K-means clustering assumes clusters are spherical, or isotropic. As it minimizes
 
 To illustrate this, we simulated three clusters in 2D, one spherical, and two having an anisotropic factor of 8:1. As in the unequal variances example, the separation distances were varied. The results are shown in interactive Figure AC. For separation distances around 4.5, Isosplit was more accurate than the other algorithms. Both k-means and GMM favored splitting the anisotropic clusters along the direction of elongation. DBSCAN struggled due to the variation in density in this example.
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://d22b563253cb5804e4a8df2877e9f06fabe1a414&label=Bluster:%20Anisotropic&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22SC*%22],%22ds%22:12}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://9d253a4d61cb158a8148db15f6e6e81d11468376&label=Bluster:%20Anisotropic&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22SC*%22],%22ds%22:24}
 <!--
 height: 700
 -->
 > Figure AC1: Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
-https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://e4aff90e619e411ab79b992919fc5db11a66a1a7&label=Accuracy%20vs.%20separation%20for%20anisotropic%20simulation
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://88518091b35c3dd0a94d981cd952b7f4975f8570&label=Accuracy%20vs.%20separation%20for%20anisotropic%20simulation
 <!--
 height: 550
 -->
@@ -180,7 +171,7 @@ height: 550
 
 Both k-means and GMM assume that clusters are Gaussian distributed. When a cluster comes from a skewed distribution, the representative points are pulled in the skewed direction which can result in incorrect decision boundaries. Isosplit does not make the Gaussian assumption, and works with both skewed and symmetric distributions, provided they are unimodal. Figurl NG demonstrates this for two simulated clusters, with the one on the right being skewed right.
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://1d0cc25804a2153f103040599feaaca91f3f2155&label=Bluster:%20Non-Gaussian&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:0}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://07cd39063379e1f6a4ed5fe6d2238ba32d92e8a6&label=Bluster%3A%20Non-Gaussian
 <!--
 height: 700
 -->
@@ -191,12 +182,12 @@ height: 700
 
 ## Many clusters
 
-https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://dd517bd8d60a3d677eb615931a4794834b82bdca&label=Bluster:%20Many%20clusters&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:9}
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://2f0a7714888ff93f87c44841260f59c33dd7b285&label=Bluster:%20Many%20clusters&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:9}
 <!--
 height: 700
 -->
 
-https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://916cfc491096d2d9ec8f38f1a7aa1340e0f5b005&label=Accuracy%20vs.%20separation%20for%20the%20many%20clusters%20simulation
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://2c81b244396553b6b6c1f9479d9b3dc42c9b31b8&label=Accuracy%20vs.%20separation%20for%20the%20many%20clusters%20simulation
 <!--
 height: 550
 -->
