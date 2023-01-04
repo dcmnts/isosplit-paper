@@ -2,12 +2,12 @@ from typing import List
 import numpy as np
 import bluster as bl
 from generate_random_clusters.generate_random_clusters import generate_random_clusters, Cluster
-from isosplit5_slow.isosplit5_slow import isosplit5_slow
+from isosplit5_slow.isosplit6_slow import isosplit6_slow
 
 def main():
-    np.random.seed(0)
+    np.random.seed(2)
 
-    sep = 1.8
+    sep = 2
     num_clusters = 4
     cluster_size = 500
     clusters: List[Cluster] = generate_random_clusters(
@@ -25,7 +25,7 @@ def main():
     total_pop = np.sum([c.pop for c in clusters])
 
     samples, labels = D.sample_with_labels(total_pop)
-    labels2, iterations = isosplit5_slow(
+    labels2, iterations = isosplit6_slow(
         samples.T,
         return_iterations=True
     )
@@ -36,6 +36,7 @@ def main():
     for ii, it in enumerate(iterations):
         new_labels = it['labels']
         if prev_labels is None or (not np.all(np.array(prev_labels) == np.array(new_labels))):
+            print(f'Adding iteration {ii}')
             DS = study.add_dataset(bl.Dataset(
                 samples=samples,
                 labels=labels,
@@ -48,7 +49,6 @@ def main():
                 parameters={},
                 labels=new_labels
             ))
-            study.add_dataset(DS)
             prev_labels = new_labels
     
     url = study.figurl()

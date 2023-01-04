@@ -520,7 +520,7 @@ def merge_test(X1, X2, centroid1, centroid2, covmat1, covmat2, isocut_threshold:
         projection2[i] = tmp
         projection12[N1 + i] = tmp
     
-    dipscore, cutpoint = isocut6_slow_no_subsampling(projection12)
+    dipscore, cutpoint = isocut6_slow(projection12)
 
     if dipscore < isocut_threshold:
         do_merge = True
