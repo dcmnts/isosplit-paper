@@ -48,17 +48,21 @@ which is used to either reject or accept the unimodality null hypothesis. Hartig
 
 Here we define a different statistic
 $$D_X=D_{X,F_X}$$
-where the approximation $F_X$  of $S_X$ is determined by up-down isotonic regression as shown in Algorithm 1 and described in Appendix [{appendixUpdown}]. Roughly speaking, $F_X$ results from an approximation of the emperical density function by a function that is monotonically increasing to the left of a critical point, and monotonically decreasing to the right (see Figure A1).
+where the approximation $F_X$  of $S_X$ is determined by up-down isotonic regression as shown in [Algorithm 1](#algorithm-1) and described in Appendix [{appendixUpdown}]. Roughly speaking, $F_X$ results from an approximation of the emperical density function by a function that is monotonically increasing to the left of a critical point, and monotonically decreasing to the right (see [Figure A1](#figure-a1)).
 
-As mentioned above, Hartigan's dip test has a flaw when the number of points in one cluster (say on the far left) is much smaller than the total size $n$. This is due to the fact that the absolute size of the dip in the empirical distribution only depends on the relatively small amount of data near the interface between the two cluster, whereas the test for rejection becomes more rigorous with increasing $n$ (note the normalizing factor of $\frac{1}{\sqrt{n}}$). To address this, we perform a series of dip tests of sizes $\lfloor n/2 \rfloor, \lfloor n/4 \rfloor, \lfloor n/8 \rfloor, \dots$. We compare two tests for each size, one starting from the left and one starting from the right. If the unimodality hypothesis is rejected in any one of these tests, the null hypothesis is rejected. Otherwise, the unimodality hypothesis is accepted. A more detailed description of this procedure is provided in Appendix XX. This procedure is encapsulated in the `ks_adj` function in Algorithm 1.
+As mentioned above, Hartigan's dip test has a flaw when the number of points in one cluster (say on the far left) is much smaller than the total size $n$. This is due to the fact that the absolute size of the dip in the empirical distribution only depends on the relatively small amount of data near the interface between the two cluster, whereas the test for rejection becomes more rigorous with increasing $n$ (note the normalizing factor of $\frac{1}{\sqrt{n}}$). To address this, we perform a series of dip tests of sizes $\lfloor n/2 \rfloor, \lfloor n/4 \rfloor, \lfloor n/8 \rfloor, \dots$. We compare two tests for each size, one starting from the left and one starting from the right. If the unimodality hypothesis is rejected in any one of these tests, the null hypothesis is rejected. Otherwise, the unimodality hypothesis is accepted. A more detailed description of this procedure is provided in Appendix XX. This procedure is encapsulated in the `ks_adj` function in [Algorithm 1](#algorithm-1).
 
-In the case where the null hypothesis is rejected, a cutpoint must be found. This is obtained using down-up isotonic regression on the density residual as given in Algorithm 1 and shown in Figurl [{ISOCUT}]. Further algorithmic details are provided in the appendix.
+In the case where the null hypothesis is rejected, a cutpoint must be found. This is obtained using down-up isotonic regression on the density residual as given in [Algorithm 1](#algorithm-1) and shown in Figurl [{ISOCUT}]. Further algorithmic details are provided in the appendix.
+
+<a name="figure-a1" />
 
 ![isocut_demo](https://user-images.githubusercontent.com/3679296/210560407-104e0bb3-ed4f-49d7-94f8-e31d85f647f6.svg)
 <!--
 name: isocut_demo.svg
 -->
 > Figure A1: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cutpoint. (A) histogram of a simulated bimodal distribution. (B) Estimated log density with unimodal fit obtained from up-down isotonic regression. (C) Residual log density with fit from down-up isotonic regression to determine the cutpoint at the minimum.
+
+<a name="algorithm-1" />
 
 ```python
 # isocut algorithm
@@ -92,7 +96,9 @@ dipscore, cutpoint = isocut(samples):
 
 ## Clustering in more than one dimension using 1D projections
 
-In this section we address the $p$-dimensional situation ($p\geq 2$) and describe an iterative procedure, termed Isosplit, in which the 1D routine is repeated as a kernel operation. The decision boundaries are less restrictive than k-means which always splits space into Voronoi cells with respect to the centroids, as illustrated in Figure B1.
+In this section we address the $p$-dimensional situation ($p\geq 2$) and describe an iterative procedure, termed Isosplit, in which the 1D routine is repeated as a kernel operation. The decision boundaries are less restrictive than k-means which always splits space into Voronoi cells with respect to the centroids, as illustrated in [Figure B1](#figure-b1).
+
+<a name="figure-b1" />
 
 ![decision_boundaries](https://user-images.githubusercontent.com/3679296/207963490-a9195e1e-88a3-4028-a7ac-a022cb0946cc.png)
 <!--
@@ -100,7 +106,9 @@ name: decision_boundaries.png
 -->
 > Figure B1. Unlike k-means, the decision boundaries between Isosplit clusters occur at regions of lower density.
 
-The proposed procedure is outlined in Algorithm 2. The input is a collection of $n$ points in $\mathbb{R}^p$, and the output is the collection of corresponding labels (or cluster memberships). The approach is similar to agglomerative hierarchical methods in that we start with a large number of clusters (output of `initial_parcellation`) and iteratively reduce the number of clusters until convergence. However, in addition to merging clusters, the algorithm may also redistribute datapoints between adjacent clusters. This is in contrast to agglomerative hierarchical methods. At each iteration, pairs of nearby clusters are selected and, for each pair, all datapoints from the two sets are projected onto a line orthogonal to the proposed hyperplane of separation. The 1D split test from the previous section is applied to the projected data (see above) and then the points are redistributed based on the optimal cut point, or if no statistically significant cut point is found, the clusters are merged. This procedure is repeated until all pairs of clusters have been handled. This process is illustrated in Figure B2.
+The proposed procedure is outlined in [Algorithm 2](#algorithm-2). The input is a collection of $n$ points in $\mathbb{R}^p$, and the output is the collection of corresponding labels (or cluster memberships). The approach is similar to agglomerative hierarchical methods in that we start with a large number of clusters (output of `initial_parcellation`) and iteratively reduce the number of clusters until convergence. However, in addition to merging clusters, the algorithm may also redistribute datapoints between adjacent clusters. This is in contrast to agglomerative hierarchical methods. At each iteration, pairs of nearby clusters are selected and, for each pair, all datapoints from the two sets are projected onto a line orthogonal to the proposed hyperplane of separation. The 1D split test from the previous section is applied to the projected data (see above) and then the points are redistributed based on the optimal cut point, or if no statistically significant cut point is found, the clusters are merged. This procedure is repeated until all pairs of clusters have been handled. This process is illustrated in [Figure B2](#figure-b2).
+
+<a name="algorithm-2" />
 
 ```python
 clusters = isosplit(X):
@@ -142,13 +150,15 @@ clusters = isosplit(X):
 ```
 > Algorithm 2. Isosplit is a clustering approach that iteratively merges and splits nearby clusters based on unimodality tests along 1D directions of projection.
 
-With each cluster pair comparison, the direction of projection may be chosen in various ways. The simplest approach is to use the line connecting the centroids of the two clusters of interest. Although this choice may be sufficient in most situations, the optimal hyperplane of separation may not be orthogonal to this line. Instead, the approach we used in our implementation is to estimate the covariance matrix of the data in the two clusters (assuming Gaussian distributions with equal variances) and use this to whiten the data prior to using the above method. The function `projection_direction` in Algorithm 2 returns a unit vector `V` representing the direction of the optimal projection line, and the function `project` simply returns the inner product of this vector with each datapoint.
+With each cluster pair comparison, the direction of projection may be chosen in various ways. The simplest approach is to use the line connecting the centroids of the two clusters of interest. Although this choice may be sufficient in most situations, the optimal hyperplane of separation may not be orthogonal to this line. Instead, the approach we used in our implementation is to estimate the covariance matrix of the data in the two clusters (assuming Gaussian distributions with equal variances) and use this to whiten the data prior to using the above method. The function `projection_direction` in [Algorithm 2](#algorithm-2) returns a unit vector `V` representing the direction of the optimal projection line, and the function `project` simply returns the inner product of this vector with each datapoint.
 
-There are also various choices for selecting pairs of clusters at each iteration (`pairs_to_compare` in Algorithm 2). One way is to select the two clusters with a minimal distance between the centroids, and then pick the next closest two, and so on. However, note that we don't want to repeat the same 1D kernel operation more than once. Therefore, the mutually closest pairs that have not yet been handled are chosen at each iteration. Further details are provided in the appendix.
+There are also various choices for selecting pairs of clusters at each iteration (`pairs_to_compare` in [Algorithm 2](#algorithm-2)). One way is to select the two clusters with a minimal distance between the centroids, and then pick the next closest two, and so on. However, note that we don't want to repeat the same 1D kernel operation more than once. Therefore, the mutually closest pairs that have not yet been handled are chosen at each iteration. Further details are provided in the appendix.
 
 The function `initial_parcellation` creates an initial labeling (or partitioning) of the data. This may be implemented using the $k$-means algorithm with the number of initial clusters chosen to be much larger than the expected number of clusters in the dataset, the assumption being that the output should not be sensitive once $K_\text{initial}$ is large enough (see Appendix [{appendixSensitivity}]). For our tests we used a method that partitioned the dataset into parcels of a target size of $10$ datapoints each without exceeding $K=200$ parcels.
 
 The critical step is `merge_test`, which is the isocut procedure described in the previous section, using a threshold of 2 for the dipscore.
+
+<a name="figure-b2" />
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://ebcb6b4cda6f756f79dcc20c7c09f6d6b2ad0372&label=Bluster:%20Isosplit%20demo
 <!--
@@ -170,9 +180,11 @@ where $C_k$ is a ground-truth cluster and $D_j$ is a cluster in the clustering b
 
 ### Unequal variances
 
-K-means clustering assumes equal variances for the clusters, which leads to incorrect decision boundaries when clusters have unequal variances (Figure B1). The error is most pronounced when the variance mismatch is large and when clusters are partially overlapping.  Isosplit is less likely to suffer from this problem due to its use of a decision boundary at the hyperplane of lowest density between the clusters.
+K-means clustering assumes equal variances for the clusters, which leads to incorrect decision boundaries when clusters have unequal variances ([Figure B1](#figure-b1)). The error is most pronounced when the variance mismatch is large and when clusters are partially overlapping.  Isosplit is less likely to suffer from this problem due to its use of a decision boundary at the hyperplane of lowest density between the clusters.
 
-To illustrate this, we simulated two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). The results are shown in Figures UV1 and UV2.
+To illustrate this, we simulated two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). The results are shown in Figures [UV1](#figure-uv1) and [UV2](#figure-uv2).
+
+<a name="figure-uv1" />
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://d764c70730a81d0e6fcd16eadcb2c4106352f3bc&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:26}
 <!--
@@ -180,6 +192,8 @@ height: 700
 -->
 
 > Figure UV1: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+
+<a name="figure-uv2" />
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://44257c70cfb3948bf51b1474855d97d925ddbff1&label=Accuracy%20vs.%20separation%20for%20unequal%20variances%20simulation
 <!--
@@ -193,13 +207,17 @@ The results show that GMM performs best, as expected since the clusters were dra
 
 Another assumption of k-means is that clusters are spherical, or isotropic. Because its cost function is the sum of squared distances to the cluster centers, k-means can favor splitting anisotropic clusters in a direction of elongation rather than separating distinct clusters. Since it does not try to minimize any such metric, Isosplit does not have this problem as it will split along directions where there is a density dip, regardless of anisotropic shape.
 
-To illustrate this, we simulated three Gaussian clusters in 2D, one spherical, and two having an anisotropy factor of 8:1. As in the unequal variances example, the separation distances were varied. The results are shown in Figure AC1. Isosplit generally performed equal to or better than all other algorithms for sufficiently large separation distances. At a separation distance of 4.5, several of the algorithms (Agg, GMM, K-means, RL) favored splitting the anisotropic clusters along the direction of elongation. DBSCAN struggled for lower separation distances due to the variation in density in this example.
+To illustrate this, we simulated three Gaussian clusters in 2D, one spherical, and two having an anisotropy factor of 8:1. As in the unequal variances example, the separation distances were varied. The results are shown in [Figure AC1](#figure-ac1). Isosplit generally performed equal to or better than all other algorithms for sufficiently large separation distances. At a separation distance of 4.5, several of the algorithms (Agg, GMM, K-means, RL) favored splitting the anisotropic clusters along the direction of elongation. DBSCAN struggled for lower separation distances due to the variation in density in this example.
+
+<a name="figure-ac1" />
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://9d253a4d61cb158a8148db15f6e6e81d11468376&label=Bluster:%20Anisotropic&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22SC*%22],%22ds%22:24}
 <!--
 height: 700
 -->
 > Figure AC1. Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+
+<a name="figure-ac2" />
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://88518091b35c3dd0a94d981cd952b7f4975f8570&label=Accuracy%20vs.%20separation%20for%20anisotropic%20simulation
 <!--
@@ -209,7 +227,9 @@ height: 550
 
 ## Non-Gaussian clusters
 
-Both k-means and GMM assume that clusters are Gaussian distributed. When a cluster comes from a skewed distribution, the representative points are pulled in the skewed direction which results in incorrect decision boundaries. Isosplit does not make the Gaussian assumption, and works with both skewed and symmetric distributions, provided they are unimodal. Figure NG1 demonstrates this for two simulated clusters, with the cluster on the right being skewed right. In our simulations, Isosplit and RL performed much better than the other methods.
+Both k-means and GMM assume that clusters are Gaussian distributed. When a cluster comes from a skewed distribution, the representative points are pulled in the skewed direction which results in incorrect decision boundaries. Isosplit does not make the Gaussian assumption, and works with both skewed and symmetric distributions, provided they are unimodal. [Figure NG1](#figure-ng1) demonstrates this for two simulated clusters, with the cluster on the right being skewed right. In our simulations, Isosplit and RL performed much better than the other methods.
+
+<a name="figure-ng1" />
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://07cd39063379e1f6a4ed5fe6d2238ba32d92e8a6&label=Bluster%3A%20Non-Gaussian
 <!--
@@ -220,11 +240,15 @@ height: 700
 
 ## Many clusters
 
+<a name="figure-mc1" />
+
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://2f0a7714888ff93f87c44841260f59c33dd7b285&label=Bluster:%20Many%20clusters&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:9}
 <!--
 height: 700
 -->
 Figure MC1. Performance of clustering algorithms for simulations of ten closely-packed clusters, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+
+<a name="figure-mc2" />
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://2c81b244396553b6b6c1f9479d9b3dc42c9b31b8&label=Accuracy%20vs.%20separation%20for%20the%20many%20clusters%20simulation
 <!--
