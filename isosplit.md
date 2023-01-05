@@ -1,18 +1,28 @@
+---
+citations-directive: dev1
+---
+
 # Isosplit: A Non-Parametric Method for Unimodal Clustering
 
 ## Abstract
 
 Many clustering algorithms require the tuning of adjustable parameters for each application or dataset, making them unsuitable for automated procedures that involve clustering. Some techniques require an initial estimate of the number of clusters, while density-based techniques typically require a scale parameter. Other parametric methods, such as mixture modeling, make assumptions about the underlying cluster distributions. Here we introduce Isosplit, a non-parametric clustering method that does not require adjustable parameters nor parametric assumptions about the underlying cluster distributions. The only assumption is that clusters are unimodal and separated from one another by hyperplanes of relatively lower density. The technique uses a variant of Hartigan's dip statistic and isotonic regression as its kernel operation. Using simulations, we compared Isosplit with standard methods including k-means, density-based techniques, and Gaussian mixture methods, and found that Isosplit overcomes many of the limitations of these techniques. Our algorithm was developed to tackle the "spike sorting" problem in electrophysiology and is well-suited for low-dimensional datasets with many observations. Isosplit has been in use as the clustering component of the MountainSort spike sorting algorithm and its source code is freely available.
 
+[Introduction](#introduction) |
+[Methods](#methods) |
+[Results](#results) |
+[Discussion](#discussion) |
+[Conclusion](#conclusion)
+
 ## Introduction
 
-The purpose of unsupervised data clustering is to automatically partition a set of datapoints into clusters that reflect the underlying structure of the data. In this work, we focus on scenarios where datapoints lie in a low-dimensional space, there are many observations, and each cluster is characterized by a dense core area surrounded by regions of lower density. This situation is common in our motivating application of spike sorting of neural firing events in electrophysiology, where this type of structure has been observed experimentally [@tiganj, @vargas].
+The purpose of unsupervised data clustering is to automatically partition a set of datapoints into clusters that reflect the underlying structure of the data. In this work, we focus on scenarios where datapoints lie in a low-dimensional space, there are many observations, and each cluster is characterized by a dense core area surrounded by regions of lower density. This situation is common in our motivating application of spike sorting of neural firing events in electrophysiology, where this type of structure has been observed experimentally [@tiganj; @vargas].
 
 Most clustering algorithms have the limitation of requiring careful adjustment of parameters. For example, the choice of the number of clusters ($K$) for k-means [@kmeans] can be difficult, particularly for large datasets with many clusters, such as in the spike sorting application. The output of k-means also depends on the initialization of the algorithm, and it is often necessary to run it multiple times to find a globally optimal solution. K-means has other limitations as well, such as rigid assumptions about cluster populations and variances, and the tendency to artificially split larger clusters and merge smaller ones.
 
 Gaussian mixture modeling (GMM) is a flexible clustering algorithm that is usually solved using expectation-maximization (EM) [@em]. Many variations exist, some of which are outlined in Chapter 11 of [@murphy]. Unlike k-means, GMM allows each cluster to be modeled using a multivariate normal distribution. Some GMM implementations require knowledge of the number of clusters beforehand (see Chapter 8 of [@mixturemodels], while others consider this as a free variable [@roberts1998bayesian] . The main disadvantage of GMM is that it assumes clusters are well modeled by Gaussian distributions, which may not always be the case. Additionally, like k-means, GMM can be difficult to optimize when the number of clusters is large. Recently, mixture models with skew non-Gaussian components have been developed [@skewGMM, @skewGMM2], but these models are more complex with additional free parameters and may be even more difficult to optimize.
 
-Hierarchical clustering (see Chapter 15 of [@zaki-book]) does not demand that the number of clusters be specified beforehand. However, the output is a dendrogram rather than a partition, preventing it from being directly applicable to our motivating example. To obtain a partition from the dendrogram, a criteria for cutting the binary tree must be specified, similar to specifying $K$ in k-means. In addition, other parameters are typically required in agglomerative methods to determine which clusters are joined in each iteration. A further issue is that the time complexity of hierarchical clustering is at least $O(n^2)$, where $n$ is the number of observations (see Sec. 14.2.3 of [@zaki-book].
+Hierarchical clustering (see Chapter 15 of [@zaki-book]) does not demand that the number of clusters be specified beforehand. However, the output is a dendrogram rather than a partition, preventing it from being directly applicable to our motivating example. To obtain a partition from the dendrogram, a criteria for cutting the binary tree must be specified, similar to specifying $K$ in k-means. In addition, other parameters are typically required in agglomerative methods to determine which clusters are joined in each iteration. A further issue is that the time complexity of hierarchical clustering is at least $O(n^2)$, where $n$ is the number of observations (see Sec. 14.2.3 of [@zaki-book]).
 
 Density-based clustering techniques such as DBSCAN [@dbscan] are useful due to their lack of assumptions about data distributions, allowing them to effectively identify clusters with non-convex shapes. However, these techniques also require parameters. For example, DBSCAN requires two parameters to be adjusted depending on the properties of the dataset, including $\epsilon$, a scale parameter. The algorithm is particularly sensitive to $\epsilon$ in dimensions greater than two, and the algorithm is not well suited for more than four dimensions. Additionally, if clusters in the dataset have varying densities, no choice of the $\epsilon$ parameter will be able to work on the entire dataset. The mean-shift [@mean-shift] algorithm overcomes this limitation to an extent by automatically estimating the bandwidth, but it is very slow, and as we will see, suffers from some of the limitations of other algorithms.
 
@@ -26,7 +36,9 @@ We first describe an algorithm for splitting a 1D sample into unimodal clusters.
 
 **TODO: SpectralClustering**: Requires n_clusters. Seems that SC can be slow, esp on non-Gaussian example.
 
-## Clustering in one dimension
+## Methods
+
+### Clustering in one dimension
 
 Any approach overcoming the above limitations must at least be able to do so in the 1D case. Here we present a non-parametric approach to 1D clustering utilizing a statistical test for unimodality and isotonic regression. This procedure will then be used as the basis for the more general situation ($p\geq 2$) described in Section [{isosplit-algorithm}].
   
@@ -54,15 +66,25 @@ As mentioned above, Hartigan's dip test has a flaw when the number of points in 
 
 In the case where the null hypothesis is rejected, a cutpoint must be found. This is obtained using down-up isotonic regression on the density residual as given in [Algorithm 1](#algorithm-1) and shown in Figurl [{ISOCUT}]. Further algorithmic details are provided in the appendix.
 
-<a name="figure-a1" />
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-a1"></a>
 
 ![isocut_demo](https://user-images.githubusercontent.com/3679296/210560407-104e0bb3-ed4f-49d7-94f8-e31d85f647f6.svg)
 <!--
 name: isocut_demo.svg
 -->
-> Figure A1: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cutpoint. (A) histogram of a simulated bimodal distribution. (B) Estimated log density with unimodal fit obtained from up-down isotonic regression. (C) Residual log density with fit from down-up isotonic regression to determine the cutpoint at the minimum.
+<figcaption>
 
-<a name="algorithm-1" />
+Figure A1: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cutpoint. (A) histogram of a simulated bimodal distribution. (B) Estimated log density with unimodal fit obtained from up-down isotonic regression. (C) Residual log density with fit from down-up isotonic regression to determine the cutpoint at the minimum.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="algorithm-1"></a>
 
 ```python
 # isocut algorithm
@@ -92,23 +114,39 @@ dipscore, cutpoint = isocut(samples):
     
     return dipscore, cutpoint
 ```
-> Algorithm 1: Isocut tests whether a 1D sampling of datapoints arises from a multi-modal distribution. In the case where the unimodality hypothesis is rejected, an optimal cutpoint is found that separates regions of relatively high density. Details on the `ks_adj`, `isotonic_updown` and `isotonic_downup` functions are provided in the appendix.
+<figcaption>
 
-## Clustering in more than one dimension using 1D projections
+Algorithm 1: Isocut tests whether a 1D sampling of datapoints arises from a multi-modal distribution. In the case where the unimodality hypothesis is rejected, an optimal cutpoint is found that separates regions of relatively high density. Details on the `ks_adj`, `isotonic_updown` and `isotonic_downup` functions are provided in the appendix.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
+### Clustering in more than one dimension using 1D projections
 
 In this section we address the $p$-dimensional situation ($p\geq 2$) and describe an iterative procedure, termed Isosplit, in which the 1D routine is repeated as a kernel operation. The decision boundaries are less restrictive than k-means which always splits space into Voronoi cells with respect to the centroids, as illustrated in [Figure B1](#figure-b1).
 
-<a name="figure-b1" />
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-b1"></a>
 
 ![decision_boundaries](https://user-images.githubusercontent.com/3679296/207963490-a9195e1e-88a3-4028-a7ac-a022cb0946cc.png)
 <!--
 name: decision_boundaries.png
 -->
-> Figure B1. Unlike k-means, the decision boundaries between Isosplit clusters occur at regions of lower density.
+<figcaption>
+
+Figure B1. Unlike k-means, the decision boundaries between Isosplit clusters occur at regions of lower density.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
 
 The proposed procedure is outlined in [Algorithm 2](#algorithm-2). The input is a collection of $n$ points in $\mathbb{R}^p$, and the output is the collection of corresponding labels (or cluster memberships). The approach is similar to agglomerative hierarchical methods in that we start with a large number of clusters (output of `initial_parcellation`) and iteratively reduce the number of clusters until convergence. However, in addition to merging clusters, the algorithm may also redistribute datapoints between adjacent clusters. This is in contrast to agglomerative hierarchical methods. At each iteration, pairs of nearby clusters are selected and, for each pair, all datapoints from the two sets are projected onto a line orthogonal to the proposed hyperplane of separation. The 1D split test from the previous section is applied to the projected data (see above) and then the points are redistributed based on the optimal cut point, or if no statistically significant cut point is found, the clusters are merged. This procedure is repeated until all pairs of clusters have been handled. This process is illustrated in [Figure B2](#figure-b2).
 
-<a name="algorithm-2" />
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="algorithm-2"></a>
 
 ```python
 clusters = isosplit(X):
@@ -148,7 +186,13 @@ clusters = isosplit(X):
 
     return clusters
 ```
-> Algorithm 2. Isosplit is a clustering approach that iteratively merges and splits nearby clusters based on unimodality tests along 1D directions of projection.
+<figcaption>
+
+Algorithm 2. Isosplit is a clustering approach that iteratively merges and splits nearby clusters based on unimodality tests along 1D directions of projection.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
 
 With each cluster pair comparison, the direction of projection may be chosen in various ways. The simplest approach is to use the line connecting the centroids of the two clusters of interest. Although this choice may be sufficient in most situations, the optimal hyperplane of separation may not be orthogonal to this line. Instead, the approach we used in our implementation is to estimate the covariance matrix of the data in the two clusters (assuming Gaussian distributions with equal variances) and use this to whiten the data prior to using the above method. The function `projection_direction` in [Algorithm 2](#algorithm-2) returns a unit vector `V` representing the direction of the optimal projection line, and the function `project` simply returns the inner product of this vector with each datapoint.
 
@@ -158,13 +202,21 @@ The function `initial_parcellation` creates an initial labeling (or partitioning
 
 The critical step is `merge_test`, which is the isocut procedure described in the previous section, using a threshold of 2 for the dipscore.
 
-<a name="figure-b2" />
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-b2"></a>
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://ebcb6b4cda6f756f79dcc20c7c09f6d6b2ad0372&label=Bluster:%20Isosplit%20demo
 <!--
 height: 500
 -->
-> Figure B2. Iterations of the Isosplit algorithm on a dataset with four clusters. Use the controls on the left to step through the iterations.
+<figcaption>
+
+Figure B2. Iterations of the Isosplit algorithm on a dataset with four clusters. Use the controls on the left to step through the iterations.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
 
 ## Results
 
@@ -178,28 +230,49 @@ $$a = \frac{1}{K}\sum_{k=1}^K\max_{j}{\frac{\#(C_k \cap D_k^\prime)}{\#(C_k \cup
 
 where $C_k$ is a ground-truth cluster and $D_j$ is a cluster in the clustering being evaluated.
 
+[Unequal variances](#unequal-variances) |
+[Anisotropic clusters](#anisotropic-clusters) |
+[Non-Gaussian clusters](#non-gaussian-clusters) |
+[Packed clusters](#packed-clusters) |<br />
+[More than two dimensions](#more-than-two-dimensions) |
+[Non-unimodal examples](#non-unimodal-examples)
+
+
 ### Unequal variances
 
 K-means clustering assumes equal variances for the clusters, which leads to incorrect decision boundaries when clusters have unequal variances ([Figure B1](#figure-b1)). The error is most pronounced when the variance mismatch is large and when clusters are partially overlapping.  Isosplit is less likely to suffer from this problem due to its use of a decision boundary at the hyperplane of lowest density between the clusters.
 
 To illustrate this, we simulated two clusters drawn from spherical multivariate Gaussian distributions in 2D with varying separation distances between the clusters. In each case, the sizes of the two clusters matched, but the standard deviations differed by a factor of 10 ($\sigma_1=1$; $\sigma_2=\frac{1}{10}$). The results are shown in Figures [UV1](#figure-uv1) and [UV2](#figure-uv2).
 
-<a name="figure-uv1" />
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-uv1"></a>
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://d764c70730a81d0e6fcd16eadcb2c4106352f3bc&label=Bluster:%20Unequal%20variances&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:26}
 <!--
 height: 700
 -->
+<figcaption>
 
-> Figure UV1: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+Figure UV1: Performance of Isosplit compared with other algorithms for two clusters of unequal variance with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
-<a name="figure-uv2" />
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-uv2"></a>
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://44257c70cfb3948bf51b1474855d97d925ddbff1&label=Accuracy%20vs.%20separation%20for%20unequal%20variances%20simulation
 <!--
 height: 550
 -->
-> Figure UV2. Average accuracies for the various clustering algorithms as a function of separation distance in the unequal variances simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
+<figcaption>
+Figure UV2. Average accuracies for the various clustering algorithms as a function of separation distance in the unequal variances simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
 
 The results show that GMM performs best, as expected since the clusters were drawn from Gaussian distributions and the number of components was known. In the non-Isosplit cases, optimal parameters were used (e.g., K=2 for k-means), whereas Isosplit does not require any parameters to be set. Generally, Isosplit performed better than the non-GMM methods when the clusters overlapped to a moderate extent. The decision boundary for k-means was incorrect due to the unequal variances between the two clusters, and DBSCAN had trouble due to the varying densities of the clusters, making it difficult to choose an ideal scale parameter. As expected, Isosplit did not detect more than one distinct cluster for low separation distances.
 
@@ -209,62 +282,108 @@ Another assumption of k-means is that clusters are spherical, or isotropic. Beca
 
 To illustrate this, we simulated three Gaussian clusters in 2D, one spherical, and two having an anisotropy factor of 8:1. As in the unequal variances example, the separation distances were varied. The results are shown in [Figure AC1](#figure-ac1). Isosplit generally performed equal to or better than all other algorithms for sufficiently large separation distances. At a separation distance of 4.5, several of the algorithms (Agg, GMM, K-means, RL) favored splitting the anisotropic clusters along the direction of elongation. DBSCAN struggled for lower separation distances due to the variation in density in this example.
 
-<a name="figure-ac1" />
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-ac1"></a>
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://9d253a4d61cb158a8148db15f6e6e81d11468376&label=Bluster:%20Anisotropic&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22SC*%22],%22ds%22:24}
 <!--
 height: 700
 -->
-> Figure AC1. Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+<figcaption>
 
-<a name="figure-ac2" />
+Figure AC1. Performance of clustering algorithms for three clusters, one spherical and two anisotropic, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-ac2"></a>
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://88518091b35c3dd0a94d981cd952b7f4975f8570&label=Accuracy%20vs.%20separation%20for%20anisotropic%20simulation
 <!--
 height: 550
 -->
-> Figure AC2. Average accuracies for the various clustering algorithms as a function of separation distance in the anisotropic clusters simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
+<figcaption>
+
+Figure AC2. Average accuracies for the various clustering algorithms as a function of separation distance in the anisotropic clusters simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
 
 ## Non-Gaussian clusters
 
 Both k-means and GMM assume that clusters are Gaussian distributed. When a cluster comes from a skewed distribution, the representative points are pulled in the skewed direction which results in incorrect decision boundaries. Isosplit does not make the Gaussian assumption, and works with both skewed and symmetric distributions, provided they are unimodal. [Figure NG1](#figure-ng1) demonstrates this for two simulated clusters, with the cluster on the right being skewed right. In our simulations, Isosplit and RL performed much better than the other methods.
 
-<a name="figure-ng1" />
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-ng1"></a>
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://07cd39063379e1f6a4ed5fe6d2238ba32d92e8a6&label=Bluster%3A%20Non-Gaussian
 <!--
 height: 700
 -->
+<figcaption>
 
-> Figure NG1: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+Figure NG1: Performance of clustering algorithms for a pair of clusters, one of which is non-Gaussian and skewed right. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
 
-## Many clusters
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
 
-<a name="figure-mc1" />
+## Packed clusters
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-pc1"></a>
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://2f0a7714888ff93f87c44841260f59c33dd7b285&label=Bluster:%20Many%20clusters&s={%22algs%22:[%22Agg*%22,%22DBSCAN*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22,%22Spect*%22],%22ds%22:9}
 <!--
 height: 700
 -->
-Figure MC1. Performance of clustering algorithms for simulations of ten closely-packed clusters, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+<figcaption>
 
-<a name="figure-mc2" />
+Figure PC1. Performance of clustering algorithms for simulations of ten closely-packed clusters, with varying separation distances. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-pc2"></a>
 
 https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://2c81b244396553b6b6c1f9479d9b3dc42c9b31b8&label=Accuracy%20vs.%20separation%20for%20the%20many%20clusters%20simulation
 <!--
 height: 550
 -->
-Figure MC2. Average accuracies for the various clustering algorithms as a function of separation distance in the many clusters simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
+<figcaption>
 
-## More than two dimensions
+Figure PC2. Average accuracies for the various clustering algorithms as a function of separation distance in the packed clusters simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
 
-## Non-unimodal examples
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
 
+### More than two dimensions
+
+### Non-unimodal examples
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
 ![example_dbscan](https://user-images.githubusercontent.com/3679296/207963843-c3ffe463-e90e-4a6b-8021-2f8571033269.png)
 <!--
 name: example_dbscan.png
 -->
-> TODO: create a simulation for this type of example
+<figcaption>
+
+TODO: create a simulation for this type of example
+
+</figcaption>
+</figure>
 
 ## Discussion
 
@@ -286,6 +405,54 @@ A multi-dimensional clustering technique, Isosplit, based on density clustering 
 
 ## References
 
-Hartigan, J. A., & Hartigan, P. M. (1985). The Dip Test of Unimodality. The Annals of Statistics.
+<!--bibliography-->
 
-Hartigan, P. M. (1985). Computation of the Dip Statistic to Test for Unimodality. Journal of the Royal Statistical Society. Series C (Applied Statistics), 34(3), 320-325.
+\[@browne\] Browne, R.P. and McNicholas, P.D. 2015. A mixture of generalized
+hyperbolic distributions. *Canad. J. Stat.* 43, 2 (2015), 176–198.
+
+\[@mean-shift\] Cheng, Y. 1995. Mean shift, mode seeking, and clustering. *Pattern
+Analysis and Machine Intelligence, IEEE Transactions on*. 17, 8 (1995),
+790–799.
+
+\[@em\] Dempster, A.P. et al. 1977. Maximum likelihood from incomplete
+data via the EM algorithm. *Journal of the Royal Statistical Society.
+Series B (methodological)*. (1977), 1–38.
+
+\[@dbscan\] Ester, M. et al. 1996. A density-based algorithm for discovering
+clusters in large spatial databases with noise. *Proceedings of 2nd
+international conference on knowledge discovery and data mining
+(kdd-96)* (1996), 226–231.
+
+\[@skewGMM\] Frühwirth-Schnatter, S. and Pyne, S. 2010. Bayesian inference for
+finite mixtures of univariate and multivariate skew-normal and skew-*t*
+distributions. *Biostat.* 11, 2 (2010), 317–336.
+
+\[hartigan1985dip\] Hartigan, J.A. and Hartigan, P. 1985. The dip test of unimodality.
+*The Annals of Statistics*. (1985), 70–84.
+
+\[@lloyd-todo\] Lloyd, S.P. 1982. Least squares quantization in PCM. *IEEE
+Transactions on Information Theory*. 28, 2 (1982), 129–137.
+
+\[@McLachlan-todo\] McLachlan, G. and Peel, D. 2000. *Finite mixture models*.
+Wiley-Interscience.
+
+\[@murphy\] Murphy, K.P. 2012. *Machine learning: A probabilistic
+perspective*. MIT Press.
+
+\[@roberts1998bayesian\] Roberts, S.J. et al. 1998. Bayesian approaches to Gaussian
+mixture modeling. *IEEE Transactions on Pattern Analysis and Machine
+Intelligence*. 20, 11 (1998), 1133–1142.
+
+\[@rodriguez-clustering\] Rodriguez, A. and Laio, A. 2014. Clustering by fast search and
+find of density peaks. *Science*. 344, 6191 (2014), 1492–1496.
+
+\[@tiganj\] Tiganj, Z. and Mboup, M. 2011. A non-parametric method for
+automatic neural spike clustering based on the non-uniform distribution
+of the data. *Journal of Neural Engineering*. 8, 6 (2011), 066014.
+
+\[@vargas\] Vargas-Irwin, C. and Donoghue, J.P. 2007. Automated spike sorting
+using density grid contour clustering and subtractive waveform
+decomposition. *Journal of Neuroscience Methods*. 164, 1 (2007), 1–18.
+
+\[@zaki-book\] Zaki, M.J. and Meira Jr, W. 2014. *Data mining and analysis:
+Fundamental concepts and algorithms*. Cambridge University Press.
