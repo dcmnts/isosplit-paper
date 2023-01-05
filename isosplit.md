@@ -407,52 +407,52 @@ A multi-dimensional clustering technique, Isosplit, based on density clustering 
 
 <!--bibliography-->
 
-\[@browne\] Browne, R.P. and McNicholas, P.D. 2015. A mixture of generalized
-hyperbolic distributions. *Canad. J. Stat.* 43, 2 (2015), 176–198.
+\[@tiganj\] Tiganj, Zoran, and Mamadou Mboup. 2011. “A Non-Parametric Method for
+Automatic Neural Spike Clustering Based on the Non-Uniform Distribution
+of the Data.” *Journal of Neural Engineering* 8 (6): 066014.
 
-\[@mean-shift\] Cheng, Y. 1995. Mean shift, mode seeking, and clustering. *Pattern
-Analysis and Machine Intelligence, IEEE Transactions on*. 17, 8 (1995),
-790–799.
+\[@vargas\] Vargas-Irwin, Carlos, and John P Donoghue. 2007. “Automated Spike
+Sorting Using Density Grid Contour Clustering and Subtractive Waveform
+Decomposition.” *Journal of Neuroscience Methods* 164 (1): 1–18.
 
-\[@em\] Dempster, A.P. et al. 1977. Maximum likelihood from incomplete
-data via the EM algorithm. *Journal of the Royal Statistical Society.
-Series B (methodological)*. (1977), 1–38.
+\[@kmeans\] Lloyd, Stuart P. 1982. “Least Squares Quantization in PCM.” *IEEE
+Transactions on Information Theory* 28 (2): 129–37.
 
-\[@dbscan\] Ester, M. et al. 1996. A density-based algorithm for discovering
-clusters in large spatial databases with noise. *Proceedings of 2nd
-international conference on knowledge discovery and data mining
-(kdd-96)* (1996), 226–231.
+\[@em\] Dempster, Arthur P, Nan M Laird, and Donald B Rubin. 1977. “Maximum
+Likelihood from Incomplete Data via the EM Algorithm.” *Journal of the
+Royal Statistical Society. Series B (Methodological)*, 1–38.
 
-\[@skewGMM\] Frühwirth-Schnatter, S. and Pyne, S. 2010. Bayesian inference for
-finite mixtures of univariate and multivariate skew-normal and skew-*t*
-distributions. *Biostat.* 11, 2 (2010), 317–336.
+\[@murphy\] Murphy, Kevin P. 2012. *Machine Learning: A Probabilistic Perspective*.
+MIT Press.
 
-\[hartigan1985dip\] Hartigan, J.A. and Hartigan, P. 1985. The dip test of unimodality.
-*The Annals of Statistics*. (1985), 70–84.
-
-\[@lloyd-todo\] Lloyd, S.P. 1982. Least squares quantization in PCM. *IEEE
-Transactions on Information Theory*. 28, 2 (1982), 129–137.
-
-\[@McLachlan-todo\] McLachlan, G. and Peel, D. 2000. *Finite mixture models*.
+\[@mixturemodels\] McLachlan, Geoffrey, and David Peel. 2000. *Finite Mixture Models*.
 Wiley-Interscience.
 
-\[@murphy\] Murphy, K.P. 2012. *Machine learning: A probabilistic
-perspective*. MIT Press.
+\[@roberts1998bayesian\] Roberts, Stephen J, Dirk Husmeier, Iead Rezek, and William Penny. 1998.
+“Bayesian Approaches to Gaussian Mixture Modeling.” *IEEE Transactions
+on Pattern Analysis and Machine Intelligence* 20 (11): 1133–42.
 
-\[@roberts1998bayesian\] Roberts, S.J. et al. 1998. Bayesian approaches to Gaussian
-mixture modeling. *IEEE Transactions on Pattern Analysis and Machine
-Intelligence*. 20, 11 (1998), 1133–1142.
+\[@skewGMM\] Frühwirth-Schnatter, S, and S Pyne. 2010. “Bayesian Inference for Finite
+Mixtures of Univariate and Multivariate Skew-Normal and Skew-*t*
+Distributions.” *Biostat.* 11 (2): 317–36.
 
-\[@rodriguez-clustering\] Rodriguez, A. and Laio, A. 2014. Clustering by fast search and
-find of density peaks. *Science*. 344, 6191 (2014), 1492–1496.
+\[@skewGMM2\] Browne, Ryan P., and Paul D. McNicholas. 2015. “A Mixture of Generalized
+Hyperbolic Distributions.” *Canad. J. Stat.* 43 (2): 176–98.
 
-\[@tiganj\] Tiganj, Z. and Mboup, M. 2011. A non-parametric method for
-automatic neural spike clustering based on the non-uniform distribution
-of the data. *Journal of Neural Engineering*. 8, 6 (2011), 066014.
+\[@zaki-book\] Zaki, Mohammed J, and Wagner Meira Jr. 2014. *Data Mining and Analysis:
+Fundamental Concepts and Algorithms*. Cambridge University Press.
 
-\[@vargas\] Vargas-Irwin, C. and Donoghue, J.P. 2007. Automated spike sorting
-using density grid contour clustering and subtractive waveform
-decomposition. *Journal of Neuroscience Methods*. 164, 1 (2007), 1–18.
+\[@dbscan\] Ester, Martin, Hans-Peter Kriegel, Jörg Sander, and Xiaowei Xu. 1996. “A
+Density-Based Algorithm for Discovering Clusters in Large Spatial
+Databases with Noise.” In *Proceedings of 2nd International Conference
+on Knowledge Discovery and Data Mining (Kdd-96)*, 226–31. AAAI Press.
 
-\[@zaki-book\] Zaki, M.J. and Meira Jr, W. 2014. *Data mining and analysis:
-Fundamental concepts and algorithms*. Cambridge University Press.
+\[@mean-shift\] Cheng, Yizong. 1995. “Mean Shift, Mode Seeking, and Clustering.”
+*Pattern Analysis and Machine Intelligence, IEEE Transactions on* 17
+(8): 790–99.
+
+\[@rodriguez-clustering\] Rodriguez, Alex, and Alessandro Laio. 2014. “Clustering by Fast Search
+and Find of Density Peaks.” *Science* 344 (6191): 1492–6.
+
+\[@hartigan1985dip\] Hartigan, John A, and PM Hartigan. 1985. “The Dip Test of Unimodality.”
+*The Annals of Statistics*, 70–84.
