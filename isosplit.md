@@ -60,7 +60,7 @@ which is used to either reject or accept the unimodality null hypothesis. Hartig
 
 Here we define a different statistic
 $$D_X=D_{X,F_X}$$
-where the approximation $F_X$  of $S_X$ is determined by up-down isotonic regression as shown in [Algorithm 1](#algorithm-1) and described in Appendix [{appendixUpdown}]. Roughly speaking, $F_X$ results from an approximation of the emperical density function by a function that is monotonically increasing to the left of a critical point, and monotonically decreasing to the right (see [Figure A1](#figure-a1)).
+where the approximation $F_X$  of $S_X$ is determined by up-down isotonic regression as shown in [Algorithm 1](#algorithm-1) and described in [Appendix A](#appendix-a). Roughly speaking, $F_X$ results from an approximation of the emperical density function by a function that is monotonically increasing to the left of a critical point, and monotonically decreasing to the right (see [Figure A1](#figure-a1)).
 
 As mentioned above, Hartigan's dip test has a flaw when the number of points in one cluster (say on the far left) is much smaller than the total size $n$. This is due to the fact that the absolute size of the dip in the empirical distribution only depends on the relatively small amount of data near the interface between the two cluster, whereas the test for rejection becomes more rigorous with increasing $n$ (note the normalizing factor of $\frac{1}{\sqrt{n}}$). To address this, we perform a series of dip tests of sizes $\lfloor n/2 \rfloor, \lfloor n/4 \rfloor, \lfloor n/8 \rfloor, \dots$. We compare two tests for each size, one starting from the left and one starting from the right. If the unimodality hypothesis is rejected in any one of these tests, the null hypothesis is rejected. Otherwise, the unimodality hypothesis is accepted. A more detailed description of this procedure is provided in Appendix XX. This procedure is encapsulated in the `ks_adj` function in [Algorithm 1](#algorithm-1).
 
@@ -116,7 +116,7 @@ dipscore, cutpoint = isocut(samples):
 ```
 <figcaption>
 
-Algorithm 1: Isocut tests whether a 1D sampling of datapoints arises from a multi-modal distribution. In the case where the unimodality hypothesis is rejected, an optimal cutpoint is found that separates regions of relatively high density. Details on the `ks_adj`, `isotonic_updown` and `isotonic_downup` functions are provided in the appendix.
+Algorithm 1: Isocut tests whether a 1D sampling of datapoints arises from a multi-modal distribution. In the case where the unimodality hypothesis is rejected, an optimal cutpoint is found that separates regions of relatively high density. Details on the `isotonic_updown`, `isotonic_downup`, and `ks_adj` functions are provided in the [Appendix A](#appendix-a) and [Appendix XXXXX](#appendix-xxxxx)).
 
 </figcaption>
 </figure>
@@ -402,6 +402,96 @@ As mentioned, a principal advantage of Isosplit is that it does not require para
 ## Conclusion
 
 A multi-dimensional clustering technique, Isosplit, based on density clustering of one-dimensional projections was presented. The algorithm was motivated by the electrophysiological spike sorting application. Unlike many existing techniques, the new algorithm does not depend on adjustable parameters such as scale or *a priori* knowledge of the number of clusters. Using simulations, Isosplit was compared with standard clustering algorithms and was shown to outperform these methods in situations where clusters were separated by regions of relatively lower density and where each pair of clusters could be largely split by a hyperplane. Isosplit was especially effective for non-Gaussian cluster distributions, anisotropic clusters, and for cases of unequal cluster variances.
+
+## <a name="appendix-a"></a>Appendix A: Up-down isotonic regression
+
+In this section we present *up-down isotonic regression*, which finds a least-squares best function that monotonically increases to a critical point and then monotonically decreases. This is a core step in Isocut, which is the kernal operation of Isosplit.
+
+Isotonic regression is a non-parametric method for fitting an ordered set of real numbers by a monotonically increasing (or decreasing) function. Suppose we want to find the best least-squares approximation of the sequence $x_1,\dots,x_n$ by a monotonically increasing sequence. Considering the more general problem that includes weights, we want to minimize the cost function
+
+$$F_w(y) = \sum_{i=1}^n w_i(y_i-x_i)^2,$$
+
+subject to
+
+$$y_1 \leq y_2 \leq \dots \leq y_n.$$
+
+This may be solved in linear time using the pool adjacent violators algorithm (PAVA) [@pava]; we do not include the full pseudocode for this standard algorithm but note that it is essentially the same as the `mava_mse` function in [Algorithm AA1](#algorithm-aa1).
+
+For up-down isotonic regression we need to find a turning point $y_b$ such that $y_1\leq y_2\leq\dots\leq y_b$ and $y_b\geq y_{b+1}\dots\geq y_n$. Again we want to minimize $F_w(y)$. One way to solve this is to use an exhaustive search for $b\in\{1,\dots,n\}$ with two runs of isotonic regression at each step. However, this would have $O(n^2)$ time complexity.
+
+A modified PAVA that finds the optimal $b$ for the up-down case in linear time is presented in [Algorithm AA1](#algorithm-aa1). The idea is to perform isotonic regression from left to right and then right to left using a modified algorithm where the mean-squared error is recorded at each step. The turning point is then chosen to minimize the sum of the two errors.
+
+In addition to up-down, *down-up isotonic regression* is also needed by Isocut. This procedure is a straightforward modification of isotonic_updown in [Algorithm AA1](#algorithm-aa1) by negating both the input and output.
+
+<figure>
+<a name="algorithm-aa1"></a>
+
+```python
+y = isotonic_updown(x):
+    # isotonic regression for increasing followed by decreasing
+    n := len(x)
+    b := find_opimal_b(x)
+    y1 := isotonic_increasing([x[1], ..., x[b]])
+    y2 := isotonic_decreasing([x[b], ..., x[n]])
+    y := [y1[1], ..., y1[b], y2[1], ..., y2[n-b+1]]
+    return y
+
+b = find_optimal_b(x):
+    # find where to switch direction
+    x1 := x
+    x2 := -reverse(x) # negative reverse ordering
+    m1 := pava_mse(x1)
+    m2 := reverse(pava_mse(x2))
+    b := argmin(m1[b] + m2[b])
+    return  b
+
+m = pava_mse(x, w):
+    # modified PAVA to return MSE at every index
+    i := 1
+    j := 1
+    count[i] := 1
+    wcount[i] := w[j]
+    sum[i] := w[j] * x[j]
+    sumsqr[i] := w[j] * x[j]^2
+    m[j] := 0
+
+    for j := 2, ..., n:
+        i := i + 1
+        count[i] := 1
+        wcount[i] := w[j]
+        sum[i] := w[j] * x[j]
+        sumsqr[i] := w[j] * x[j]^2
+        m[j] := m[j - 1]
+        while:
+            if i = 1:
+                break # first block
+            if sum[i - 1]/count[i-1] < sum[i]/count[i]:
+                break # criteria for stop merging in PAVA
+
+            # merge the blocks
+            m_before := sumsqr[i-1] - sum[i-1]^2/count[i-1]
+            m_before := m_before + sumsqr[i] - sum[i]^2/count[i]
+            count[i-1] := count[i-1] + count[i]
+            wcount[i-1] := wcount[i-1] + wcount[i]
+            sum[i-1] := sum[i-1] + sum[i]
+            sumsqr[i-1] := sumsqr[i-1] + sumsqr[i]
+            m_after := sumsqr[i-1] - sum[i-1]^2/count[i-1]
+            m[j] := m[j] + m_after - m_before
+            i := i - 1
+```
+
+<figcaption>
+
+Algorithm AA1. Up-down isotropic regression.
+
+</figcaption>
+</figure>
+
+## Appendix P: Packing Gaussian clusters for simulations
+
+Our simulations required automatic generation of synthetic datasets with fixed numbers of clusters of varying densities, populations, spreads, anisotropies, and orientations. The most challenging programming task was to determine the random locations of the cluster centers. If clusters were spaced out too much then the clustering would be trivial. On the other hand, overlapping clusters cannot be expected to be successfully separated. Here we briefly describe a procedure for choosing the locations such that clusters are tightly packed with the constraint that the solid ellipsoids corresponding to Mahalanobis distance $z_0$ do not intersect. Thus $z_0$, the separation parameter, controls the tightness of packing.
+
+In the packed clusters example, the clusters are positioned iteratively, one at a time. Each cluster is positioned at the origin and then moved out radially in small increments of a random direction until the non-intersection criteria is satisfied. Thus we only need to determine whether two clusters defined by $(\mu_1,\Sigma_1)$ and $(\mu_2,\Sigma_2)$ are spaced far enough apart. Here $\mu_j$ are the cluster centers and $\Sigma_j$ are the covariance matrices. The problem boils down to determining whether two arbitrary $p$-dimensional ellipsoids intersect. Surprisingly this is a nontrivial task, especially in higher dimensions, but an efficient iterative solution was discovered by [@ellipsoid-distance]. TODO: check to see how this is implemented in Python (old: For the present study, the Lin-Han algorithm was implemented in MATLAB).
 
 ## References
 
