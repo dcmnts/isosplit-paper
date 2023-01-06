@@ -222,7 +222,7 @@ Figure B2. Iterations of the Isosplit algorithm on a dataset with four clusters.
 
 To highlight scenarios where Isosplit overcomes the limitations of other methods, we evaluated the accuracy of Isosplit and various standard algorithms using simulated datasets. We selected optimal parameters for the non-Isosplit algorithms based on the known simulation parameters (e.g., the number of clusters for k-means). Isosplit, on the other hand, does not require any user-defined parameters.
 
-The following standard algorithms were evaluated: Agglomerative clustering (Agg) from scikit learn with default parameters and known number of clusters; DBSCAN from scikit learn with optimal scale parameter corresponding to the simulated datasets; Gaussian Mixture Model (GMM) with `covariance_type='full'` and known number of clusters; K-means with known number of clusters; Rodriguez-Laio (RL) or density-peak clustering with implementation described in the appendix and known number of clusters; and Spectral clustering (Spect) with `assign_labels='discretize'` and known number of clusters.
+The following standard algorithms were evaluated: Agglomerative clustering (Agg) from scikit learn with default parameters and known number of clusters; DBSCAN from scikit learn with optimal scale parameter corresponding to the simulated datasets; Gaussian Mixture Model (GMM) with `covariance_type='full'` and known number of clusters; K-means with known number of clusters; Rodriguez-Laio (RL) or density-peak clustering with implementation described in the appendix and known number of clusters (TODO: explain that more than just the number of clusters were provided to the algorithm); and Spectral clustering (Spect) with `assign_labels='discretize'` and known number of clusters.
 
 We used the following formula when reporting the accuracy of a clustering compared with ground truth:
 
@@ -374,13 +374,14 @@ Figure PC2. Average accuracies for the various clustering algorithms as a functi
 
 <!--------------------------------------------------------------------------------------------->
 <figure>
-![example_dbscan](https://user-images.githubusercontent.com/3679296/207963843-c3ffe463-e90e-4a6b-8021-2f8571033269.png)
+
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://216953ae0558cfe0e5985f35da381b302dd36c68&label=Bluster:%20clustering-benchmark-datasets&s={%22algs%22:[%22Agg*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22],%22ds%22:0}
 <!--
-name: example_dbscan.png
+height: 700
 -->
 <figcaption>
 
-TODO: create a simulation for this type of example
+Figure NU1. Miscellaneous non-unimodal examples. Isosplit is not designed to handle these cases.
 
 </figcaption>
 </figure>
@@ -491,7 +492,7 @@ Algorithm AA1. Up-down isotropic regression.
 
 Our simulations required automatic generation of synthetic datasets with fixed numbers of clusters of varying densities, populations, spreads, anisotropies, and orientations. The most challenging programming task was to determine the random locations of the cluster centers. If clusters were spaced out too much then the clustering would be trivial. On the other hand, overlapping clusters cannot be expected to be successfully separated. Here we briefly describe a procedure for choosing the locations such that clusters are tightly packed with the constraint that the solid ellipsoids corresponding to Mahalanobis distance $z_0$ do not intersect. Thus $z_0$, the separation parameter, controls the tightness of packing.
 
-In the packed clusters example, the clusters are positioned iteratively, one at a time. Each cluster is positioned at the origin and then moved out radially in small increments of a random direction until the non-intersection criteria is satisfied. Thus we only need to determine whether two clusters defined by $(\mu_1,\Sigma_1)$ and $(\mu_2,\Sigma_2)$ are spaced far enough apart. Here $\mu_j$ are the cluster centers and $\Sigma_j$ are the covariance matrices. The problem boils down to determining whether two arbitrary $p$-dimensional ellipsoids intersect. Surprisingly this is a nontrivial task, especially in higher dimensions, but an efficient iterative solution was discovered by [@ellipsoid-distance]. TODO: check to see how this is implemented in Python (old: For the present study, the Lin-Han algorithm was implemented in MATLAB).
+In the packed clusters example, the clusters are positioned iteratively, one at a time. Each cluster is positioned at the origin and then moved out radially in small increments of a random direction until the non-intersection criteria is satisfied. Thus we only need to determine whether two clusters defined by $(\mu_1,\Sigma_1)$ and $(\mu_2,\Sigma_2)$ are spaced far enough apart. Here $\mu_j$ are the cluster centers and $\Sigma_j$ are the covariance matrices. The problem boils down to determining whether two arbitrary $p$-dimensional ellipsoids intersect. Surprisingly this is a nontrivial task, especially in higher dimensions, but an efficient iterative solution is known [@ellipsoid-distance].
 
 ## References
 
