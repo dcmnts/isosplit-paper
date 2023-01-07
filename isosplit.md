@@ -1,4 +1,5 @@
 ---
+title: "Isosplit: A Non-Parametric Method for Unimodal Clustering"
 citations-directive: dev1
 ---
 
@@ -220,7 +221,7 @@ Figure B2. Iterations of the Isosplit algorithm on a dataset with four clusters.
 
 ## Results
 
-To highlight scenarios where Isosplit overcomes the limitations of other methods, we evaluated the accuracy of Isosplit and various standard algorithms using simulated datasets. We selected optimal parameters for the non-Isosplit algorithms based on the known simulation parameters (e.g., the number of clusters for k-means). Isosplit, on the other hand, does not require any user-defined parameters.
+To highlight scenarios where Isosplit overcomes the limitations of other methods, as well as scenarios that highlight its limitations, we evaluated the accuracy of Isosplit and various standard algorithms using simulated datasets. We selected optimal parameters for the non-Isosplit algorithms based on the known simulation parameters (e.g., the number of clusters for k-means). Isosplit, on the other hand, does not require any user-defined parameters.
 
 The following standard algorithms were evaluated: Agglomerative clustering (Agg) from scikit learn with default parameters and known number of clusters; DBSCAN from scikit learn with optimal scale parameter corresponding to the simulated datasets; Gaussian Mixture Model (GMM) with `covariance_type='full'` and known number of clusters; K-means with known number of clusters; Rodriguez-Laio (RL) or density-peak clustering with implementation described in the appendix and known number of clusters (TODO: explain that more than just the number of clusters were provided to the algorithm); and Spectral clustering (Spect) with `assign_labels='discretize'` and known number of clusters.
 
@@ -234,6 +235,7 @@ where $C_k$ is a ground-truth cluster and $D_j$ is a cluster in the clustering b
 [Anisotropic clusters](#anisotropic-clusters) |
 [Non-Gaussian clusters](#non-gaussian-clusters) |
 [Packed clusters](#packed-clusters) |<br />
+[Small clusters](#small-clusters) |
 [More than two dimensions](#more-than-two-dimensions) |
 [Non-unimodal examples](#non-unimodal-examples)
 
@@ -367,6 +369,43 @@ Figure PC2. Average accuracies for the various clustering algorithms as a functi
 </figcaption>
 </figure>
 <!--------------------------------------------------------------------------------------------->
+
+### Small clusters
+
+Isosplit is designed to work with relatively large clusters, i.e., clusters with large numbers of datapoints. This is because the dip statistic of Isocut relies on a sufficiently large number of samples for comparison. Figures [SC1](#figure-sc1) and [SC2](#figure-sc2) show the results of simulations of two spherical Gaussian clusters with moderate separation and varying cluster sizes. As expected, Isosplit is not able to separate the clusters for small sizes (under 50 datapoints or so).
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-sc1"></a>
+
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://3002cb2d65c972848e2cffd19032d2b9e9ea985f&label=Bluster%3A%20Small%20clusters
+<!--
+height: 700
+-->
+<figcaption>
+
+Figure SC1. Performance of clustering algorithms for simulations of two clusters with varying sizes (numbers of datapoints). Isosplit is not designed to handle clusters with many datapoints.Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-sc2"></a>
+
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://05de816255cffca1415bc6d493af93af0c8f9a3a&label=Accuracy%20vs.%20cluster%20size%20for%20small%20clusters%20simulation
+<!--
+height: 550
+-->
+<figcaption>
+
+Figure SC2. Average accuracies for the various clustering algorithms as a function of clusters size. Isosplit is not designed to handle clusters with many datapoints. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
 
 ### More than two dimensions
 

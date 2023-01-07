@@ -3,12 +3,13 @@ import numpy as np
 import bluster as bl
 import figurl as fig
 from generate_random_clusters.generate_random_clusters import generate_random_clusters, Cluster
-from plot_accuracies import plot_accuracies_vs_separation
+from plot_accuracies import plot_accuracies_vs_parameter
 
 
 def main():
     np.random.seed(0)
 
+    ndims = 2
     num_clusters = 10
     cluster_size = 200
     separations = np.arange(1.5, 3.25, 0.25)
@@ -30,7 +31,7 @@ def main():
     for sep in separations:
         for itrial in range(1, num_trials + 1):
             clusters: List[Cluster] = generate_random_clusters(
-                ndims=2,
+                ndims=ndims,
                 num_clusters=num_clusters,
                 zdist=sep,
                 pops=[cluster_size for i in range(num_clusters)],
@@ -62,19 +63,19 @@ def main():
                     labels=labels2
                 ))
 
-    title='Accuracy vs. separation for the many clusters simulation'
-    chart = plot_accuracies_vs_separation(
+    title='Accuracy vs. separation for the packed clusters simulation'
+    chart = plot_accuracies_vs_parameter(
         study,
         title=title
     )
     url = fig.Altair(chart).url(label=title)
     print(url)
-    with open('results/many_clusters_plot.figurl', 'w') as f:
+    with open('results/packed_clusters_plot.figurl', 'w') as f:
         f.write(url)
 
     url = study.figurl()
     print(url)
-    with open('results/many_clusters.figurl', 'w') as f:
+    with open('results/packed_clusters.figurl', 'w') as f:
         f.write(url)
 
 if __name__ == '__main__':

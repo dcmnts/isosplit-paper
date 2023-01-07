@@ -1,7 +1,7 @@
 import numpy as np
 import bluster as bl
 import figurl as fig
-from plot_accuracies import plot_accuracies_vs_separation
+from plot_accuracies import plot_accuracies_vs_parameter
 
 
 def main():
@@ -54,7 +54,7 @@ def main():
                 ))
     
     title='Accuracy vs. separation for unequal variances simulation'
-    chart = plot_accuracies_vs_separation(
+    chart = plot_accuracies_vs_parameter(
         study,
         title=title
     )

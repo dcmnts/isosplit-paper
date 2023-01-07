@@ -1,7 +1,7 @@
 import numpy as np
 import bluster as bl
 import figurl as fig
-from plot_accuracies import plot_accuracies_vs_separation
+from plot_accuracies import plot_accuracies_vs_parameter
 import kachery_cloud as kcl
 
 
