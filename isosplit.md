@@ -1,6 +1,6 @@
 ---
 title: "Isosplit: A Non-Parametric Method for Unimodal Clustering"
-citations-directive: dev1
+citations-directive: 1
 ---
 
 # Isosplit: A Non-Parametric Method for Unimodal Clustering
@@ -235,8 +235,8 @@ where $C_k$ is a ground-truth cluster and $D_j$ is a cluster in the clustering b
 [Anisotropic clusters](#anisotropic-clusters) |
 [Non-Gaussian clusters](#non-gaussian-clusters) |
 [Packed clusters](#packed-clusters) |<br />
+[Higher dimensions](#higher-dimensions) |
 [Small clusters](#small-clusters) |
-[More than two dimensions](#more-than-two-dimensions) |
 [Non-unimodal examples](#non-unimodal-examples)
 
 
@@ -338,6 +338,8 @@ Figure NG1: Performance of clustering algorithms for a pair of clusters, one of 
 
 ## Packed clusters
 
+To illustrate the performance of Isosplit and other algorithms for datasets with larger numbers of clusters, we simulated ten closely-packed Gaussian clusters with varying separation distances. The method for generating the cluster centroids and covariance matrices is described in [Appendix P](#appendix-p). The results are presented in Figures [PC1](#figure-pc1) and [PC2](#figure-pc2).
+
 <!--------------------------------------------------------------------------------------------->
 <figure>
 <a name="figure-pc1"></a>
@@ -370,9 +372,43 @@ Figure PC2. Average accuracies for the various clustering algorithms as a functi
 </figure>
 <!--------------------------------------------------------------------------------------------->
 
+### Higher dimensions
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-pc1"></a>
+
+https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://4aa2b7b4d000262bbb09b7474815525b9a823a40&label=Bluster:%20Higher%20dimensions&s={%22algs%22:[%22Agg*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22],%22ds%22:12}
+<!--
+height: 700
+-->
+<figcaption>
+
+Figure HD1. Performance of clustering algorithms for simulations of ten closely-packed clusters, with varying number of dimensions. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters). Use the interactive controls to explore all simulations.
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
+<!--------------------------------------------------------------------------------------------->
+<figure>
+<a name="figure-hd2"></a>
+
+https://figurl.org/f?v=gs://figurl/vegalite-2&d=sha1://b473ca9b355c8405816bf0aabe9987158c3dad0e&label=Accuracy%20vs.%20separation%20for%20the%20higher%20dimensions%20simulation
+<!--
+height: 550
+-->
+<figcaption>
+
+Figure HD2. Average accuracies for the various clustering algorithms as a function of number of dimensions in the higher dimensions simulation. Algorithms with an asterisk have optimal parameters set based on known properties of the datasets (e.g., number of clusters).
+
+</figcaption>
+</figure>
+<!--------------------------------------------------------------------------------------------->
+
 ### Small clusters
 
-Isosplit is designed to work with relatively large clusters, i.e., clusters with large numbers of datapoints. This is because the dip statistic of Isocut relies on a sufficiently large number of samples for comparison. Figures [SC1](#figure-sc1) and [SC2](#figure-sc2) show the results of simulations of two spherical Gaussian clusters with moderate separation and varying cluster sizes. As expected, Isosplit is not able to separate the clusters for small sizes (under 50 datapoints or so).
+Isosplit is designed to work best with relatively large clusters, or clusters with large numbers of datapoints. This is because the dip statistic of Isocut requires a sufficiently large number of samples. Figures [SC1](#figure-sc1) and [SC2](#figure-sc2) show the results of simulations of two spherical Gaussian clusters with moderate separation and varying cluster sizes. As expected, Isosplit is not able to separate the clusters for small sizes (under 50 datapoints or so).
 
 <!--------------------------------------------------------------------------------------------->
 <figure>
@@ -406,13 +442,13 @@ Figure SC2. Average accuracies for the various clustering algorithms as a functi
 </figure>
 <!--------------------------------------------------------------------------------------------->
 
-
-### More than two dimensions
-
 ### Non-unimodal examples
+
+To illustrate scenarios where Isosplit performs poorly, we applied Isosplit and other standard algorithms to a collection of datasets with non-unimodal clusters. The results are shown in [Figure NU1](#figure-nu1).
 
 <!--------------------------------------------------------------------------------------------->
 <figure>
+<a name="figure-nu1"></a>
 
 https://figurl.org/f?v=gs://figurl/bluster-views-1&d=sha1://216953ae0558cfe0e5985f35da381b302dd36c68&label=Bluster:%20clustering-benchmark-datasets&s={%22algs%22:[%22Agg*%22,%22GMM*%22,%22Isosplit%22,%22K-means*%22,%22RL*%22],%22ds%22:0}
 <!--
@@ -527,7 +563,7 @@ Algorithm AA1. Up-down isotropic regression.
 </figcaption>
 </figure>
 
-## Appendix P: Packing Gaussian clusters for simulations
+## <a name="appendix-p"></a>Appendix P: Packing Gaussian clusters for simulations
 
 Our simulations required automatic generation of synthetic datasets with fixed numbers of clusters of varying densities, populations, spreads, anisotropies, and orientations. The most challenging programming task was to determine the random locations of the cluster centers. If clusters were spaced out too much then the clustering would be trivial. On the other hand, overlapping clusters cannot be expected to be successfully separated. Here we briefly describe a procedure for choosing the locations such that clusters are tightly packed with the constraint that the solid ellipsoids corresponding to Mahalanobis distance $z_0$ do not intersect. Thus $z_0$, the separation parameter, controls the tightness of packing.
 
