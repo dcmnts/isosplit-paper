@@ -23,7 +23,7 @@ Most clustering algorithms have the limitation of requiring careful adjustment o
 
 Gaussian mixture modeling (GMM) is a flexible clustering algorithm that is usually solved using expectation-maximization (EM) [@em]. Unlike k-means, GMM allows each cluster to be modeled using a multivariate normal distribution. Some GMM implementations require knowledge of the number of clusters beforehand (see Chapter 8 of [@mixturemodels], while others consider this as a free variable [@roberts1998bayesian] . The main disadvantage of GMM is that it assumes clusters are well modeled by Gaussian distributions, which may not always be the case. Additionally, like k-means, GMM can be difficult to optimize when the number of clusters is large. Recently, mixture models with skew non-Gaussian components have been developed [@skewGMM, @skewGMM2], but these models are more complex with additional free parameters and may be even more difficult to optimize.
 
-Hierarchical clustering (see [@murtagh2012algorithms]) does not demand that the number of clusters be specified beforehand. However, the output is a dendrogram rather than a partition, preventing it from being directly applicable to our motivating example. To obtain a partition from the dendrogram, a criteria for cutting the binary tree must be specified, similar to specifying $K$ in k-means. In addition, other parameters are typically required in agglomerative methods to determine which clusters are joined in each iteration. A further issue is that the computation can be slow compared with other algorithms.
+Hierarchical clustering (see [@murtagh2012algorithms, @day1984efficient]) does not demand that the number of clusters be specified beforehand. However, the output is a dendrogram rather than a partition, preventing it from being directly applicable to our motivating example. To obtain a partition from the dendrogram, a criteria for cutting the binary tree must be specified, similar to specifying $K$ in k-means. In addition, other parameters are typically required in agglomerative methods to determine which clusters are joined in each iteration. A further issue is that the computation can be slow compared with other algorithms.
 
 Density-based clustering techniques such as DBSCAN [@dbscan] are useful due to their lack of assumptions about data distributions, allowing them to effectively identify clusters with non-convex shapes. However, these techniques also require parameters. For example, DBSCAN requires two parameters to be adjusted depending on the properties of the dataset, including $\epsilon$, a scale parameter. The algorithm is particularly sensitive to $\epsilon$ in dimensions greater than two, and the algorithm is not well suited for more than four dimensions. Additionally, if clusters in the dataset have varying densities, no choice of the $\epsilon$ parameter will be able to work on the entire dataset. The mean-shift [@mean-shift] algorithm overcomes this limitation to an extent by automatically estimating the bandwidth, but it is very slow, and as we will see, suffers from some of the limitations of other algorithms.
 
@@ -219,17 +219,19 @@ Figure B2. Iterations of the Isosplit algorithm on a dataset with four clusters.
 </figure>
 <!--------------------------------------------------------------------------------------------->
 
-## Results
+### Algorithm comparisons
 
 To highlight scenarios where Isosplit overcomes the limitations of other methods, as well as scenarios that highlight its limitations, we evaluated the accuracy of Isosplit and various standard algorithms using simulated datasets. We selected optimal parameters for the non-Isosplit algorithms based on the known simulation parameters (e.g., the number of clusters for k-means). Isosplit, on the other hand, does not require any user-defined parameters.
 
-The following standard algorithms were evaluated: Agglomerative clustering (Agg) from scikit learn with default parameters and known number of clusters; DBSCAN from scikit learn with optimal scale parameter corresponding to the simulated datasets; Gaussian Mixture Model (GMM) with `covariance_type='full'` and known number of clusters; K-means with known number of clusters; Rodriguez-Laio (RL) or density-peak clustering with implementation described in the appendix and known number of clusters (TODO: explain that more than just the number of clusters were provided to the algorithm); and Spectral clustering (Spect) with `assign_labels='discretize'` and known number of clusters.
+The following standard algorithms were evaluated: Agglomerative clustering (Agg) from Scikit-learn [@pedregosa2011scikit] with default parameters and known number of clusters; DBSCAN from Scikit-learn with optimal scale parameter corresponding to the simulated datasets (see [Appendix S](#appendix-s)); Gaussian Mixture Model (GMM) from Scikit-learn with `covariance_type='full'` and known number of clusters; K-means from Scikit-learn with known number of clusters; Rodriguez-Laio (RL) or density-peak clustering with implementation described in the [Appendix S](#appendix-s) with optimal threshold chosen using the known clustering; and Spectral clustering (Spect) from Scikit-learn with `assign_labels='discretize'` and known number of clusters.
 
 We used the following formula when reporting the accuracy of a clustering compared with ground truth:
 
 $$a = \frac{1}{K}\sum_{k=1}^K\max_{j}{\frac{\#(C_k \cap D_k^\prime)}{\#(C_k \cup D_j)}}$$
 
-where $C_k$ is a ground-truth cluster and $D_j$ is a cluster in the clustering being evaluated.
+where $C_k$ is a ground-truth cluster and $D_j$ is a cluster in the clustering being evaluated. We prefer this measure of cluster similarity over others in the literature because it weights each cluster equally, allowing us to assess fairly the performance when there is a wide range of cluster populations. With this formula, the accuracy for a cluster reflects both sensitivity and specificity; a split into two equal parts yields an accuracy of 50% and a merge of two equal-sized clusters also yields an accuracy of 50%.
+
+## Results
 
 [Unequal variances](#unequal-variances) |
 [Anisotropic clusters](#anisotropic-clusters) |
@@ -562,6 +564,14 @@ Algorithm AA1. Up-down isotropic regression.
 
 </figcaption>
 </figure>
+
+## <a name="appendix-s"></a>Appendix S: Implementation of standard algorithms
+
+As mentioned in the [algorithm comparisons](#algorithm-comparisons) section, we used Scikit-learn for most of the standard algorithms. In each case, the true clustering was used to set one of the parameters (usually the number of clusters), and otherwise default parameters were used except where indicated.
+
+For DBSCAN, the scale parameter $epsilon$ needed to be set. This is a delicate balance; if $epsilon$ is too large, there will be false merges, whereas if $epsilon$ is too small, there will be false splits. Based on experimentation we decided to use $\epsilon=5 \sigma / \sqrt{n}$ where $sigma$ is the standard deviation in one direction of one of the clusters, and $n$ is the number of points in that cluster. We only used DBSCAN for the 2D simulations.
+
+Since the RL algorithm is not available in Scikit-learn we implemented it ourselves in Python. We followed the procedure in the original paper [@rodriguez-clustering] with a couple of modifications. In the paper the local density is estimated as the number of points in a ball of radius $r$ for some choice of $r$. Of course we don't want to have to choose $r$. Also, this method results in integer values for the densities, which is not ideal since it leads to many ties when comparing densities of points. Instead we use the reciprocal of the distance to the 5th nearest neighbor as the density estimate. The other part of RL that is not spelled out in the paper is how to select the outlier points that define the clusters. In this study we chose a threshold for the $\delta$ parameter in order to optimize the accuracy based on the known cluster labels. Of course this method cannot be used in practice because the true labels are not known.
 
 ## <a name="appendix-p"></a>Appendix P: Packing Gaussian clusters for simulations
 
