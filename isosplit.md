@@ -19,11 +19,11 @@ Many clustering algorithms require the tuning of adjustable parameters for each 
 
 The purpose of unsupervised data clustering is to automatically partition a set of datapoints into clusters that reflect the underlying structure of the data. In this work, we focus on scenarios where datapoints lie in a low-dimensional space, there are many observations, and each cluster is characterized by a dense core area surrounded by regions of lower density. This situation is common in our motivating application of spike sorting of neural firing events in electrophysiology, where this type of structure has been observed experimentally [@tiganj; @vargas].
 
-Most clustering algorithms have the limitation of requiring careful adjustment of parameters. For example, the choice of the number of clusters ($K$) for k-means [@kmeans] can be difficult, particularly for large datasets with many clusters, such as in the spike sorting application. The output of k-means also depends on the initialization of the algorithm, and it is often necessary to run it multiple times to find a globally optimal solution. K-means has other limitations as well, such as rigid assumptions about cluster populations and variances, and the tendency to artificially split larger clusters and merge smaller ones.
+Most clustering algorithms have the limitation of requiring careful adjustment of parameters. For example, the choice of the number of clusters ($K$) for k-means [@lloyd1982least] can be difficult, particularly for large datasets with many clusters, such as in the spike sorting application. The output of k-means also depends on the initialization of the algorithm, and it is often necessary to run it multiple times to find a globally optimal solution. K-means has other limitations as well, such as rigid assumptions about cluster populations and variances, and the tendency to artificially split larger clusters and merge smaller ones.
 
-Gaussian mixture modeling (GMM) is a flexible clustering algorithm that is usually solved using expectation-maximization (EM) [@em]. Many variations exist, some of which are outlined in Chapter 11 of [@murphy]. Unlike k-means, GMM allows each cluster to be modeled using a multivariate normal distribution. Some GMM implementations require knowledge of the number of clusters beforehand (see Chapter 8 of [@mixturemodels], while others consider this as a free variable [@roberts1998bayesian] . The main disadvantage of GMM is that it assumes clusters are well modeled by Gaussian distributions, which may not always be the case. Additionally, like k-means, GMM can be difficult to optimize when the number of clusters is large. Recently, mixture models with skew non-Gaussian components have been developed [@skewGMM, @skewGMM2], but these models are more complex with additional free parameters and may be even more difficult to optimize.
+Gaussian mixture modeling (GMM) is a flexible clustering algorithm that is usually solved using expectation-maximization (EM) [@em]. Unlike k-means, GMM allows each cluster to be modeled using a multivariate normal distribution. Some GMM implementations require knowledge of the number of clusters beforehand (see Chapter 8 of [@mixturemodels], while others consider this as a free variable [@roberts1998bayesian] . The main disadvantage of GMM is that it assumes clusters are well modeled by Gaussian distributions, which may not always be the case. Additionally, like k-means, GMM can be difficult to optimize when the number of clusters is large. Recently, mixture models with skew non-Gaussian components have been developed [@skewGMM, @skewGMM2], but these models are more complex with additional free parameters and may be even more difficult to optimize.
 
-Hierarchical clustering (see Chapter 15 of [@zaki-book]) does not demand that the number of clusters be specified beforehand. However, the output is a dendrogram rather than a partition, preventing it from being directly applicable to our motivating example. To obtain a partition from the dendrogram, a criteria for cutting the binary tree must be specified, similar to specifying $K$ in k-means. In addition, other parameters are typically required in agglomerative methods to determine which clusters are joined in each iteration. A further issue is that the time complexity of hierarchical clustering is at least $O(n^2)$, where $n$ is the number of observations (see Sec. 14.2.3 of [@zaki-book]).
+Hierarchical clustering (see [@murtagh2012algorithms]) does not demand that the number of clusters be specified beforehand. However, the output is a dendrogram rather than a partition, preventing it from being directly applicable to our motivating example. To obtain a partition from the dendrogram, a criteria for cutting the binary tree must be specified, similar to specifying $K$ in k-means. In addition, other parameters are typically required in agglomerative methods to determine which clusters are joined in each iteration. A further issue is that the computation can be slow compared with other algorithms.
 
 Density-based clustering techniques such as DBSCAN [@dbscan] are useful due to their lack of assumptions about data distributions, allowing them to effectively identify clusters with non-convex shapes. However, these techniques also require parameters. For example, DBSCAN requires two parameters to be adjusted depending on the properties of the dataset, including $\epsilon$, a scale parameter. The algorithm is particularly sensitive to $\epsilon$ in dimensions greater than two, and the algorithm is not well suited for more than four dimensions. Additionally, if clusters in the dataset have varying densities, no choice of the $\epsilon$ parameter will be able to work on the entire dataset. The mean-shift [@mean-shift] algorithm overcomes this limitation to an extent by automatically estimating the bandwidth, but it is very slow, and as we will see, suffers from some of the limitations of other algorithms.
 
@@ -31,7 +31,7 @@ Rodriguez-Laio (RL) clustering [@rodriguez-clustering], also known as density-pe
 
 In this article, we present a new density-based, scale-independent clustering technique that is suitable for situations where clusters are expected to be unimodal and can be separated from one another by hyperplanes. A cluster is considered unimodal if it is derived from a distribution that has a single peak of maximum density when projected onto any line. Thus, our assumption is that when any two adjacent clusters are projected onto the normal of a dividing hyperplane, they will form a 1D bimodal distribution with a split-point of lower density at the point of hyperplane intersection. Loosely speaking, this is the case when clusters are well-spaced and have convex shapes.
 
-In addition to being density-based, our technique has elements of agglomerative hierarchical clustering and involves the EM-style iterative approach of k-means. It uses a non-parametric procedure to separate 1D distributions based on a modified Hartigan's dip statistic [@hartigan1985dip, @other_hartigan1985dip] and isotonic regression, which don't require any adjustable parameters (with the exception of a statistical significance threshold). In particular, no scale parameter is needed for density estimation. Moreover, since the core step of each iteration is 1D clustering applied to projections of data subsets onto lines, it overcomes the curse of dimensionality (the tradeoff being that we cannot handle clusters of arbitrary shape).
+In addition to being density-based, our technique has elements of agglomerative hierarchical clustering and involves the EM-style iterative approach of k-means. It uses a non-parametric procedure to separate 1D distributions based on a modified Hartigan's dip statistic [@hartigan1985dip, @hartigan1985algorithm] and isotonic regression [@barlow1972isotonic], which don't require any adjustable parameters (with the exception of a statistical significance threshold). In particular, no scale parameter is needed for density estimation. Moreover, since the core step of each iteration is 1D clustering applied to projections of data subsets onto lines, it overcomes the curse of dimensionality (the tradeoff being that we cannot handle clusters of arbitrary shape).
 
 We first describe an algorithm for splitting a 1D sample into unimodal clusters. This forms the basis of the $p$-dimensional clustering technique, Isosplit. We present simulations comparing Isosplit with standard clustering techniques. We also address computational efficiency and scaling properties. Finally, we summarize the results and discusses the limitations of the method. The appendices cover implementation details for the algorithms and the generation of synthetic datasets.
 
@@ -581,15 +581,12 @@ of the Data.” *Journal of Neural Engineering* 8 (6): 066014.
 Sorting Using Density Grid Contour Clustering and Subtractive Waveform
 Decomposition.” *Journal of Neuroscience Methods* 164 (1): 1–18.
 
-\[@kmeans\] Lloyd, Stuart P. 1982. “Least Squares Quantization in PCM.” *IEEE
+\[@lloyd1982least\] Lloyd, Stuart. 1982. “Least Squares Quantization in Pcm.” *IEEE
 Transactions on Information Theory* 28 (2): 129–37.
 
 \[@em\] Dempster, Arthur P, Nan M Laird, and Donald B Rubin. 1977. “Maximum
 Likelihood from Incomplete Data via the EM Algorithm.” *Journal of the
 Royal Statistical Society. Series B (Methodological)*, 1–38.
-
-\[@murphy\] Murphy, Kevin P. 2012. *Machine Learning: A Probabilistic Perspective*.
-MIT Press.
 
 \[@mixturemodels\] McLachlan, Geoffrey, and David Peel. 2000. *Finite Mixture Models*.
 Wiley-Interscience.
@@ -605,8 +602,9 @@ Distributions.” *Biostat.* 11 (2): 317–36.
 \[@skewGMM2\] Browne, Ryan P., and Paul D. McNicholas. 2015. “A Mixture of Generalized
 Hyperbolic Distributions.” *Canad. J. Stat.* 43 (2): 176–98.
 
-\[@zaki-book\] Zaki, Mohammed J, and Wagner Meira Jr. 2014. *Data Mining and Analysis:
-Fundamental Concepts and Algorithms*. Cambridge University Press.
+\[@murtagh2012algorithms\] Murtagh, Fionn, and Pedro Contreras. 2012. “Algorithms for Hierarchical
+Clustering: An Overview.” *Wiley Interdisciplinary Reviews: Data Mining
+and Knowledge Discovery* 2 (1): 86–97.
 
 \[@dbscan\] Ester, Martin, Hans-Peter Kriegel, Jörg Sander, and Xiaowei Xu. 1996. “A
 Density-Based Algorithm for Discovering Clusters in Large Spatial
@@ -622,3 +620,17 @@ and Find of Density Peaks.” *Science* 344 (6191): 1492–6.
 
 \[@hartigan1985dip\] Hartigan, John A, and PM Hartigan. 1985. “The Dip Test of Unimodality.”
 *The Annals of Statistics*, 70–84.
+
+\[@hartigan1985algorithm\] Hartigan, PM. 1985. “Algorithm as 217: Computation of the Dip Statistic
+to Test for Unimodality.” *Journal of the Royal Statistical Society.
+Series C (Applied Statistics)* 34 (3): 320–25.
+
+\[@barlow1972isotonic\] Barlow, Richard E, and Hugh D Brunk. 1972. “The Isotonic Regression
+Problem and Its Dual.” *Journal of the American Statistical Association*
+67 (337): 140–47.
+
+\[@pava\] Robertson, Tim, F T Wright, and Richard L Dykstra. 1988. *Order
+Restricted Statistical Inference*. Wiley New York.
+
+\[@ellipsoid-distance\] Lin, Anhua, and Shih-Ping Han. 2002. “On the Distance Between Two
+Ellipsoids.” *SIAM Journal on Optimization* 13 (1): 298–308.
