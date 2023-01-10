@@ -59,15 +59,15 @@ which is used to either reject or accept the unimodality null hypothesis. Hartig
 
 Here we define a different statistic
 $$D_X=D_{X,F_X}$$
-where the approximation $F_X$  of $S_X$ is determined by up-down isotonic regression as shown in [Algorithm 1](#algorithm-1) and described in [Appendix A](#appendix-a). Roughly speaking, $F_X$ results from an approximation of the emperical density function by a function that is monotonically increasing to the left of a critical point, and monotonically decreasing to the right (see [Figure A1](#figure-a1)).
+where the approximation $F_X$  of $S_X$ is determined by up-down isotonic regression as shown in [Algorithm 1](#algorithm-1) and described in [Appendix A](#appendix-a). Roughly speaking, $F_X$ results from an approximation of the emperical density function by a function that is monotonically increasing to the left of a critical point, and monotonically decreasing to the right (see [Figure 1](#figure-1)).
 
 As mentioned above, Hartigan's dip test has a flaw when the number of points in one cluster (say on the far left) is much smaller than the total size $n$. This is due to the fact that the absolute size of the dip in the empirical distribution only depends on the relatively small amount of data near the interface between the two cluster, whereas the test for rejection becomes more rigorous with increasing $n$ (because of the normalizing factor of $\frac{1}{\sqrt{n}}$). To address this, we perform a series of dip tests of sizes $\lfloor n/2 \rfloor, \lfloor n/4 \rfloor, \lfloor n/8 \rfloor, \dots$. We compare two tests for each size, one starting from the left and one starting from the right. If the unimodality hypothesis is rejected in any one of these tests, the null hypothesis is rejected. Otherwise, the unimodality hypothesis is accepted. A more detailed description of this procedure is provided in [Appendix KS](#appendix-ks). This procedure is encapsulated in the `ks_adj` function in [Algorithm 1](#algorithm-1).
 
-In the case where the null hypothesis is rejected, a cut point must be found. This is obtained using down-up isotonic regression on the density residual as given in [Algorithm 1](#algorithm-1) and shown in [Figure A1](#figure-a1). Further algorithmic details are provided in the appendix.
+In the case where the null hypothesis is rejected, a cut point must be found. This is obtained using down-up isotonic regression on the density residual as given in [Algorithm 1](#algorithm-1) and shown in [Figure 1](#figure-1). Further algorithmic details are provided in the appendix.
 
 <!--------------------------------------------------------------------------------------------->
 <figure>
-<a name="figure-a1"></a>
+<a name="figure-1"></a>
 
 ![isocut_demo](https://user-images.githubusercontent.com/3679296/210560407-104e0bb3-ed4f-49d7-94f8-e31d85f647f6.svg)
 <!--
@@ -75,7 +75,7 @@ name: isocut_demo.svg
 -->
 <figcaption>
 
-Figure A1: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cut point. (A) histogram of a simulated bimodal distribution. (B) Estimated log density with unimodal fit obtained from up-down isotonic regression. (C) Residual log density with fit from down-up isotonic regression to determine the cut point at the minimum.
+Figure 1: Illustration of the Isocut algorithm for testing for unimodality in 1D and determining an optimal cut point. (A) histogram of a simulated bimodal distribution. (B) Estimated log density with unimodal fit obtained from up-down isotonic regression. (C) Residual log density with fit from down-up isotonic regression to determine the cut point at the minimum.
 
 </figcaption>
 </figure>
@@ -199,7 +199,7 @@ There are also various choices for selecting pairs of clusters at each iteration
 
 The function `initial_parcellation` creates an initial labeling (or partitioning) of the data. This may be implemented using the $k$-means algorithm with the number of initial clusters chosen to be much larger than the expected number of clusters in the dataset, the assumption being that the output should not be sensitive once $K_\text{initial}$ is large enough (see Appendix [{appendixSensitivity}]). For our tests we used a method that partitioned the dataset into parcels of a target size of $10$ datapoints each without exceeding $K=200$ parcels.
 
-The critical step is `merge_test`, which is the isocut procedure described in the previous section, using a threshold of 2 for the dipscore.
+The critical step is `merge_test`, which is the isocut procedure described in the previous section, using a threshold of 2 for the dip score.
 
 <!--------------------------------------------------------------------------------------------->
 <figure>
@@ -491,16 +491,16 @@ subject to
 
 $$y_1 \leq y_2 \leq \dots \leq y_n.$$
 
-This may be solved in linear time using the pool adjacent violators algorithm (PAVA) [@pava]; we do not include the full pseudocode for this standard algorithm but note that it is essentially the same as the `mava_mse` function in [Algorithm AA1](#algorithm-aa1).
+This may be solved in linear time using the pool adjacent violators algorithm (PAVA) [@pava]; we do not include the full pseudocode for this standard algorithm but note that it is essentially the same as the `mava_mse` function in [Algorithm A1](#algorithm-a1).
 
 For up-down isotonic regression we need to find a turning point $y_b$ such that $y_1\leq y_2\leq\dots\leq y_b$ and $y_b\geq y_{b+1}\dots\geq y_n$. Again we want to minimize $F_w(y)$. One way to solve this is to use an exhaustive search for $b\in\{1,\dots,n\}$ with two runs of isotonic regression at each step. However, this would have $O(n^2)$ time complexity.
 
-A modified PAVA that finds the optimal $b$ for the up-down case in linear time is presented in [Algorithm AA1](#algorithm-aa1). The idea is to perform isotonic regression from left to right and then right to left using a modified algorithm where the mean-squared error is recorded at each step. The turning point is then chosen to minimize the sum of the two errors.
+A modified PAVA that finds the optimal $b$ for the up-down case in linear time is presented in [Algorithm A1](#algorithm-a1). The idea is to perform isotonic regression from left to right and then right to left using a modified algorithm where the mean-squared error is recorded at each step. The turning point is then chosen to minimize the sum of the two errors.
 
-In addition to up-down, *down-up isotonic regression* is also needed by Isocut. This procedure is a straightforward modification of isotonic_updown in [Algorithm AA1](#algorithm-aa1) by negating both the input and output.
+In addition to up-down, *down-up isotonic regression* is also needed by Isocut. This procedure is a straightforward modification of isotonic_updown in [Algorithm A1](#algorithm-a1) by negating both the input and output.
 
 <figure>
-<a name="algorithm-aa1"></a>
+<a name="algorithm-a1"></a>
 
 ```python
 y = isotonic_updown(x):
@@ -558,14 +558,81 @@ m = pava_mse(x, w):
 
 <figcaption>
 
-Algorithm AA1. Up-down isotropic regression.
+Algorithm A1. Up-down isotropic regression.
 
 </figcaption>
 </figure>
 
 ## <a name="appendix-a"></a>Appendix KS: Modified Kolmogorov-Smirnov statistic
 
-TODO
+Here we provide the algorithm for computing the adjusted Kolmogorov-Smirnov statistic used as the dip score in the Isocut algorithm. As discussed in the [Methods](#methods) section, the Hartigan dip test is not designed to handle the case where a relatively small cluster occurs at the periphery of the 1D dataset. To address this we define this adjusted statistic in [Algorithm KS](#algorithm-ks) which returns the maximum of a series of dip scores on subsets of data, starting from the left and starting from the right.
+
+<figure>
+<a name="algorithm-ks"></a>
+
+```python
+dipscore, critical_range = ks_adj(counts1, counts2, peak_index):
+    N := len(counts1) = len(counts2)
+    critical_range_min := 1
+    critical_range_max := N
+    dipscore_best := -1
+
+    # from the left
+    counts1_left := counts1[1, ..., peak_index]
+    counts2_left := counts2[1, ..., peak_index]
+    m := peak_index
+    while m >= 4 or m == peak_index:
+        ks0 := ks(counts1_left[1, ..., m], counts2_left[1, ..., m])
+        if ks0 > dipscore_best:
+            critical_range_min := 1
+            critical_range_max := m
+            dipscore_best := ks0
+        m := floor(m / 2)
+    
+    # from the right
+    counts1_right := counts1[peak_index, ..., N]
+    counts2_right := counts2[peak_index, ..., N]
+    m := N - peak_index + 1
+    while m >= 4 or m == peak_index - peak_index + 1:
+        ks0 := ks(counts1_right[1, ..., m], counts2_right[1, ..., m])
+        if ks0 > dipscore_best:
+            critical_range_min := N - m + 1
+            critical_range_max := N
+            dipscore_best := ks0
+        m := floor(m / 2)
+    
+    dipscore := dipscore_best
+
+    return dipscore, critical_range_min, critical_range_max
+
+dipscore = ks(counts1, counts2):
+    N := len(counts1) = len(counts2)
+
+    sum_counts1 := sum(counts1)
+    sum_counts2 := sum(counts2)
+    cumsum_counts1 := 0
+    cumsum_counts2 := 0
+
+    max_diff := 0
+    for i := 1 ... N:
+        cumsum_counts1 += counts1[i]
+        cumsum_counts2 += counts2[i]
+        if sum_counts1 > 0 and sum_counts2 > 0:
+            diff := abs(cumsum_counts1 / sum_counts1 - cumsum_counts2 / sum_counts2)
+            if (diff > max_diff):
+                max_diff := diff
+
+    dipscore := max_diff * sqrt((sum_counts1 + sum_counts2) / 2)
+
+    return dipscore
+```
+
+<figcaption>
+
+Algorithm KS. The adjusted Kolmogorov-Smirnov statistic used as the dip score in Isocut.
+
+<figcaption>
+</figure>
 
 ## <a name="appendix-s"></a>Appendix S: Implementation of standard algorithms
 
