@@ -491,7 +491,7 @@ subject to
 
 $$y_1 \leq y_2 \leq \dots \leq y_n.$$
 
-This may be solved in linear time using the pool adjacent violators algorithm (PAVA) [@pava]; we do not include the full pseudocode for this standard algorithm but note that it is essentially the same as the `mava_mse` function in [Algorithm A1](#algorithm-a1).
+This may be solved in linear time using the pool adjacent violators algorithm (PAVA) [@pava]; we do not include the full pseudocode for this standard algorithm but note that it is essentially the same as the `pava_mse` function in [Algorithm A1](#algorithm-a1).
 
 For up-down isotonic regression we need to find a turning point $y_b$ such that $y_1\leq y_2\leq\dots\leq y_b$ and $y_b\geq y_{b+1}\dots\geq y_n$. Again we want to minimize $F_w(y)$. One way to solve this is to use an exhaustive search for $b\in\{1,\dots,n\}$ with two runs of isotonic regression at each step. However, this would have $O(n^2)$ time complexity.
 
